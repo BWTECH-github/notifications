@@ -1,15 +1,16 @@
 <?xml version="1.0"?>
+<!-- Modified by BW-Tech GmbH for owncloud.online (PHP 8.4). -->
 <info>
 	<id>notifications</id>
 	<name>Notifications</name>
 	<summary>Notification system for internal events</summary>
-	<description>This application adds an internal notification system to an ownCloud instance. Notifications are triggered by apps like the Announcement Center or Custom Groups and displayed via a bell indicator in the WebUI as well as via the ownCloud clients.</description>
+	<description>This application adds an internal notification system to an ownCloud instance. Notifications are triggered by apps like the Announcement Center or Custom Groups and displayed via a bell indicator in the WebUI as well as via the ownCloud clients. This is a PHP 8.4 fork maintained by BW-Tech GmbH for owncloud.online.</description>
 
 	<category>tools</category>
 	<screenshot>https://raw.githubusercontent.com/owncloud/promo/e1dd604d66b4c5f765579b4c160de3268169ea3c/ownCloud%20logo%20square.png</screenshot>
 
 	<licence>AGPL</licence>
-	<author>Joas Schilling, Thomas Müller</author>
+	<author>Joas Schilling, Thomas Müller, modified by BW-Tech GmbH</author>
 	<version>0.7.0</version>
 
 	<types>
@@ -18,9 +19,9 @@
 
 	<default_enable/>
 
-	<website>https://github.com/owncloud/notifications</website>
-	<bugs>https://github.com/owncloud/notifications/issues</bugs>
-	<repository type="git">https://github.com/owncloud/notifications.git</repository>
+	<website>https://github.com/GrossLukas/notifications</website>
+	<bugs>https://github.com/GrossLukas/notifications/issues</bugs>
+	<repository type="git">https://github.com/GrossLukas/notifications.git</repository>
 
 	<commands>
 		<command>OCA\Notifications\Command\Generate</command>
@@ -31,8 +32,8 @@
 	</settings>
 
 	<dependencies>
-		<owncloud min-version="11" max-version="11" />
-		<php min-version="8.3" />
+		<owncloud min-version="11" max-version="11.99" />
+		<php min-version="8.4" />
 	</dependencies>
 	<use-migrations>true</use-migrations>
 </info>

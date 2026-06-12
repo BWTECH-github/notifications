@@ -3,6 +3,7 @@
  * @author Joas Schilling <nickvergessen@owncloud.com>
  *
  * @copyright Copyright (c) 2016, ownCloud, Inc.
+ * Modified by BW-Tech GmbH
  * @license AGPL-3.0
  *
  * This code is free software: you can redistribute it and/or modify
@@ -334,13 +335,19 @@ class Handler {
 			$sql->update('notifications')
 				->where($sql->expr()->eq('notification_id', $sql->createNamedParameter($row['notification_id'])));
 
-			$linkUrlComponents = \parse_url($row['link']);
+			// Die OR-Bedingung kann Zeilen liefern, in denen nur eine der
+			// beiden nullable Spalten gesetzt ist — NULL an parse_url/strpos
+			// wäre unter PHP 8.4 eine Deprecation.
+			$rowLink = (string)($row['link'] ?? '');
+			$rowActions = (string)($row['actions'] ?? '');
+
+			$linkUrlComponents = \parse_url($rowLink);
 			if (isset($linkUrlComponents['scheme'], $linkUrlComponents['path'])) {
 				$sql->set('link', $sql->createNamedParameter($linkUrlComponents['path']));
 			}
 
-			if (\strpos($row['actions'], 'http') !== false) {
-				$actions = \json_decode($row['actions'], true);
+			if (\strpos($rowActions, 'http') !== false) {
+				$actions = \json_decode($rowActions, true);
 
 				foreach ($actions as $index => $action) {
 					$actionUrlComponents = \parse_url($action['link']);
