@@ -3,6 +3,7 @@
  * @author Juan Pablo Villafáñez <jvillafanez@solidgear.es>
  *
  * @copyright Copyright (c) 2018, ownCloud GmbH
+ * Modified by BW-Tech GmbH
  * @license AGPL-3.0
  *
  * This code is free software: you can redistribute it and/or modify
@@ -114,13 +115,45 @@ class NotificationMailerTest extends \Test\TestCase {
 
 		$sentMessage = $this->notificationMailer->sendNotification($mockedNotification, 'http://test.server/oc', 'test@example.com');
 
-		$this->assertEquals(['test@example.com'], $sentMessage->getTo());
+		// Seit dem symfony/mailer-Umbau im Core liefert getTo() Address-Objekte
+		// statt Strings — für den Vergleich auf die E-Mail-Adresse normalisieren.
+		$recipients = \array_map(
+			static fn ($address) => \is_object($address) ? $address->getAddress() : (string)$address,
+			\array_values($sentMessage->getTo())
+		);
+		$this->assertEquals(['test@example.com'], $recipients);
 		// check that the notification subject is the email subject
 		$this->assertEquals('This is a parsed subject', $sentMessage->getSubject());
 
 		// notification's subject and message must be present in the email body, as well as the server url
-		$this->assertStringContainsString($mockedNotification->getParsedMessage(), $sentMessage->getPlainBody());
-		$this->assertStringContainsString('http://test.server/oc', $sentMessage->getPlainBody());
+		$plainBody = self::extractPlainBody($sentMessage->getPlainBody());
+		$this->assertStringContainsString($mockedNotification->getParsedMessage(), $plainBody);
+		$this->assertStringContainsString('http://test.server/oc', $plainBody);
+	}
+
+	/**
+	 * Seit dem symfony/mailer-Umbau im Core liefert getPlainBody() je nach
+	 * Mail-Aufbau ein TextPart- oder Multipart-Objekt statt eines Strings —
+	 * hier wird der text/plain-Teil für die Assertions extrahiert.
+	 *
+	 * @param mixed $body
+	 */
+	private static function extractPlainBody($body): string {
+		if (\is_string($body)) {
+			return $body;
+		}
+		if ($body instanceof \Symfony\Component\Mime\Part\TextPart) {
+			return $body->getBody();
+		}
+		if ($body instanceof \Symfony\Component\Mime\Part\AbstractMultipartPart) {
+			foreach ($body->getParts() as $part) {
+				$extracted = self::extractPlainBody($part);
+				if ($extracted !== '') {
+					return $extracted;
+				}
+			}
+		}
+		return '';
 	}
 
 	/**

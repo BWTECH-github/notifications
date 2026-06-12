@@ -1,14 +1,19 @@
 {
-    "name": "owncloud/notifications",
+    "name": "bwtech/notifications",
+    "description": "Notification system for owncloud.online. Modified by BW-Tech GmbH (PHP 8.4 fork of owncloud/notifications)",
+    "license": "AGPL-3.0-only",
+    "modified-by": "BW-Tech GmbH",
     "config": {
         "platform": {
-            "php": "8.3"
+            "php": "8.4"
         },
         "allow-plugins": {
             "bamarni/composer-bin-plugin": true
         }
     },
-    "require": {},
+    "require": {
+        "php": ">=8.4"
+    },
     "require-dev": {
         "bamarni/composer-bin-plugin": "^1.8"
     },
