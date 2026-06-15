@@ -159,7 +159,8 @@
 			if (this.getIcon()) {
 				var $icon = $('<img>', {
 					'class' : cssNameSpace + '-icon',
-					'src'   : this.getIcon()
+					'src'   : this.getIcon(),
+					'alt'   : ''
 				});
 
 				// Insert before container

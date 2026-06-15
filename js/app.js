@@ -37,7 +37,7 @@
 
 			// Setup elements
 			this.$notifications = $('<div class="notifications hidden"></div>');
-			this.$button = $('<div class="notifications-button menutoggle"><img class="svg" alt="' + t('notifications', 'Notifications') + '" src="' + OC.imagePath('notifications', 'notifications') + '"></div>');
+			this.$button = $('<button type="button" class="notifications-button menutoggle" aria-label="' + t('notifications', 'Notifications') + '" aria-haspopup="true" aria-expanded="false"><img class="svg" alt="" src="' + OC.imagePath('notifications', 'notifications') + '"></button>');
 			this.$container = $('<div class="notification-container"></div>');
 			var $wrapper = $('<div class="notification-wrapper"></div>');
 
@@ -138,6 +138,8 @@
 		_onNotificationsButtonClick: function() {
 			// Show a popup
 			OC.showMenu(null, OCA.Notifications.$container);
+			// Reflect the menu open state for assistive technology
+			OCA.Notifications.$button.attr('aria-expanded', OCA.Notifications.$container.is(':visible') ? 'true' : 'false');
 		},
 
 		initialFetch: function() {
@@ -307,7 +309,7 @@
 		 */
 		_onHaveNoNotifications: function() {
 			// Remove the border
-			$('div.notifications-button').removeClass('hasNotifications');
+			this.$button.removeClass('hasNotifications');
 			$('div.notifications .emptycontent').removeClass('hidden');
 			this.$button.find('img').attr('src', OC.imagePath('notifications', 'notifications'));
 
