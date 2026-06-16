@@ -1,9 +1,10 @@
 <?php script('notifications', 'personal_settings'); ?>
 <div id="email_notifications" class="section">
-	<h2 class="app-name"><?php p($l->t('Mail Notifications'));?></h2>
+	<h2 id="email_notifications_label" class="app-name"><?php p($l->t('Mail Notifications'));?></h2>
 	<?php if ($_['validUserObject']): ?>
 	<p><?php p($l->t('You can choose to be notified about events via mail. Some events are informative, others require an action (like accept/decline). Select your preference below:')); ?></p>
-	<select id="email_sending_option" name="email_sending_option">
+	<label for="email_sending_option" class="hidden-visually"><?php p($l->t('Mail Notifications')); ?></label>
+	<select id="email_sending_option" name="email_sending_option" aria-labelledby="email_notifications_label">
 		<?php foreach ($_['possibleOptions'] as $possibleValue => $data): ?>
 		<option value="<?php p($possibleValue) ?>" <?php if ($data['selected']) {
 			echo 'selected="selected"';

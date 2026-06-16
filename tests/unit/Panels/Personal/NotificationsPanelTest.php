@@ -88,7 +88,7 @@ class NotificationsPanelTest extends \Test\TestCase {
 		$this->optionsStorage->method('getOptions')->willReturn(['email_sending_option' => $selectedValue]);
 
 		$page = $this->notificationsPanel->getPanel()->fetchPage();
-		$this->assertStringContainsString('<h2 class="app-name">Mail Notifications</h2>', $page);
+		$this->assertStringContainsString('<h2 id="email_notifications_label" class="app-name">Mail Notifications</h2>', $page);
 		if (\in_array($selectedValue, ['never', 'action', 'always'], true)) {
 			$this->assertStringContainsString("<option value=\"$selectedValue\" selected=\"selected\">", $page);
 		} else {
