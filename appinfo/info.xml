@@ -11,7 +11,7 @@
 
 	<licence>AGPL</licence>
 	<author>Joas Schilling, Thomas Müller, modified by BW-Tech GmbH</author>
-	<version>0.7.0</version>
+	<version>0.7.1</version>
 
 	<types>
 		<logging/>
