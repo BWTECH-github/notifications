@@ -19,9 +19,9 @@
 
 	<default_enable/>
 
-	<website>https://github.com/GrossLukas/notifications</website>
-	<bugs>https://github.com/GrossLukas/notifications/issues</bugs>
-	<repository type="git">https://github.com/GrossLukas/notifications.git</repository>
+	<website>https://github.com/BWTECH-github/notifications</website>
+	<bugs>https://github.com/BWTECH-github/notifications/issues</bugs>
+	<repository type="git">https://github.com/BWTECH-github/notifications.git</repository>
 
 	<commands>
 		<command>OCA\Notifications\Command\Generate</command>
