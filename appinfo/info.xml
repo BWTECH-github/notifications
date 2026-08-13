@@ -4,10 +4,9 @@
 	<id>notifications</id>
 	<name>Notifications</name>
 	<summary>Notification system for internal events</summary>
-	<description>This application adds an internal notification system to an ownCloud instance. Notifications are triggered by apps like the Announcement Center or Custom Groups and displayed via a bell indicator in the WebUI as well as via the ownCloud clients. This is a PHP 8.4 fork maintained by BW-Tech GmbH for owncloud.online.</description>
+	<description>This application adds an internal notification system to an owncloud.online instance. Notifications are triggered by apps like the Announcement Center or Custom Groups and displayed via a bell indicator in the WebUI as well as via the owncloud.online clients. This is a PHP 8.4 fork maintained by BW-Tech GmbH for owncloud.online.</description>
 
 	<category>tools</category>
-	<screenshot>https://raw.githubusercontent.com/owncloud/promo/e1dd604d66b4c5f765579b4c160de3268169ea3c/ownCloud%20logo%20square.png</screenshot>
 
 	<licence>AGPL</licence>
 	<author>Joas Schilling, Thomas Müller, modified by BW-Tech GmbH</author>
@@ -19,7 +18,7 @@
 
 	<default_enable/>
 
-	<website>https://github.com/BWTECH-github/notifications</website>
+	<website>https://owncloud.online</website>
 	<bugs>https://github.com/BWTECH-github/notifications/issues</bugs>
 	<repository type="git">https://github.com/BWTECH-github/notifications.git</repository>
 
