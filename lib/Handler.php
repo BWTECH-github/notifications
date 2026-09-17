@@ -316,7 +316,7 @@ class Handler {
 	/**
 	 * Remove the base url from absolute links in the database.
 	 * This affects the columns 'link' and 'action'.
-	 * e.g: http://owncloud.com/test -> /test
+	 * e.g: http://example.com/test -> /test
 	 *
 	 * @return int number of updated notifications
 	 */

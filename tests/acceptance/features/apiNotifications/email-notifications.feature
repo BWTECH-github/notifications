@@ -11,23 +11,23 @@ Feature: notifications-content
   Scenario: Create notification
     When user "Alice" sets the email notification option to "always" using the API
     And user "Alice" is sent a notification with
-      | app         | notificationsacceptancetesting                                            |
-      | timestamp   | 144958517                                                                 |
-      | subject     | Acceptance Testing                                                        |
-      | link        | https://owncloud.org/blog/about-activities-and-notifications-in-owncloud/ |
-      | message     | About Activities and Notifications in ownCloud                            |
-      | object_type | blog                                                                      |
-      | object_id   | 9483                                                                      |
+      | app         | notificationsacceptancetesting                               |
+      | timestamp   | 144958517                                                    |
+      | subject     | Acceptance Testing                                           |
+      | link        | https://example.com/blog/about-activities-and-notifications/ |
+      | message     | About Activities and Notifications in owncloud.online        |
+      | object_type | blog                                                         |
+      | object_id   | 9483                                                         |
     Then the email address "alice@example.org" should have received an email with the body containing
       """
       Acceptance Testing
 
-      About Activities and Notifications in ownCloud
+      About Activities and Notifications in owncloud.online
 
       Open in owncloud.online:
-      https://owncloud.org/blog/about-activities-and-notifications-in-owncloud/
+      https://example.com/blog/about-activities-and-notifications/
       """
     And the email address "alice@example.org" should have received an email with the body containing
       """
-      href="https://owncloud.org/blog/about-activities-and-notifications-in-owncloud/"
+      href="https://example.com/blog/about-activities-and-notifications/"
       """

@@ -91,7 +91,6 @@ appstore: ## Builds the source package for the app store
 	CHANGELOG.md \
 	COPYING \
 	$(appstore_package_name)
-	rm -R $(appstore_package_name)/l10n/.tx
 
 ifdef CAN_SIGN
 	$(sign) --path="$(appstore_package_name)"
@@ -115,7 +114,7 @@ test-php-codecheck: ## Test php codecheck
 	$(occ) app:check-code $(app_name) -c deprecation
 
 .PHONY: test-php-style
-test-php-style: ## Run php-cs-fixer and check owncloud code-style
+test-php-style: ## Run php-cs-fixer and check the code style
 test-php-style: vendor-bin/owncloud-codestyle/vendor vendor-bin/php_codesniffer/vendor
 	$(PHP_CS_FIXER) fix -v --diff --allow-risky yes --dry-run
 	$(PHP_CODESNIFFER) --runtime-set ignore_warnings_on_exit --standard=phpcs.xml tests/acceptance

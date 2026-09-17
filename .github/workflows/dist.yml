@@ -1,17 +1,50 @@
-name: Build dist
+name: Build distribution tarball
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    types:
-      - opened
-      - synchronize
-      - reopened
+    tags:
+      - 'v*'
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  build:
-    uses: owncloud/reusable-workflows/.github/workflows/build.yml@main
+  appstore:
+    name: Build appstore tarball
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, xml, ctype, json, curl
+          coverage: none
+          tools: composer:v2
+
+      - name: Cache Composer downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/composer
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.json', 'composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install runtime dependencies (no dev)
+        run: composer install --no-dev --prefer-dist --no-progress
+
+      # Das Makefile leitet den Paketnamen aus dem Checkout-Verzeichnis ab
+      # (= Repository-Name "notifications", identisch mit der App-ID).
+      - name: Build appstore tarball
+        run: make appstore
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: notifications-appstore
+          path: build/artifacts/appstore/notifications.tar.gz
+          if-no-files-found: error

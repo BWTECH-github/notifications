@@ -8,7 +8,7 @@ use OCP\Migration\ISchemaMigration;
 
 /**
  * Change the type of the 'object_id' column from integer to string
- * Migration step required to update from ownCloud 8.2.x
+ * Migration step required to update from server version 8.2.x
  */
 class Version20180604132522 implements ISchemaMigration {
 	public function changeSchema(Schema $schema, array $options) {

@@ -1,6 +1,6 @@
 {
     "name": "bwtech/notifications",
-    "description": "Notification system for owncloud.online. Modified by BW-Tech GmbH (PHP 8.4 fork of owncloud/notifications)",
+    "description": "Notification system for owncloud.online. Modified by BW-Tech GmbH (PHP 8.4 fork of the upstream notifications app)",
     "license": "AGPL-3.0-only",
     "modified-by": "BW-Tech GmbH",
     "config": {

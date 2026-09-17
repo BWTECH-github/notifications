@@ -16,25 +16,25 @@ Feature: display notifications on the webUI
 
   Scenario: Create notifications
     When user "Alice" is sent a notification with
-      | app         | notificationsacceptancetesting |
-      | timestamp   | 144958517                      |
-      | subject     | Acceptance Testing             |
-      | link        | https://owncloud.org/blog      |
-      | message     | Notifications in ownCloud      |
-      | object_type | blog                           |
-      | object_id   | 9483                           |
+      | app         | notificationsacceptancetesting   |
+      | timestamp   | 144958517                        |
+      | subject     | Acceptance Testing               |
+      | link        | https://example.com/blog         |
+      | message     | Notifications in owncloud.online |
+      | object_type | blog                             |
+      | object_id   | 9483                             |
     And user "Alice" is sent a notification with
       | app         | notificationsacceptancetesting |
       | timestamp   | 144958517                      |
       | subject     | UI tests                       |
-      | link        | http://owncloud.org/           |
+      | link        | http://example.com/            |
       | message     | second notification            |
       | object_type | blog                           |
       | object_id   | 9484                           |
     Then the user should see 2 notifications on the webUI with these details
-      | title              | link                      | message                   | user  |
-      | Acceptance Testing | https://owncloud.org/blog | Notifications in ownCloud | Alice |
-      | UI tests           | http://owncloud.org/      | second notification       | Alice |
+      | title              | link                     | message                          | user  |
+      | Acceptance Testing | https://example.com/blog | Notifications in owncloud.online | Alice |
+      | UI tests           | http://example.com/      | second notification              | Alice |
 
 
   Scenario: follow notifications link
@@ -43,8 +43,8 @@ Feature: display notifications on the webUI
       | timestamp   | 144958517                              |
       | subject     | Acceptance Testing                     |
       | link        | %base_url%/index.php/settings/personal |
-      | message     | Settings of ownCloud                   |
+      | message     | Settings of owncloud.online            |
       | object_type | blog                                   |
       | object_id   | 9483                                   |
     And the user follows the link of the first notification on the webUI
-    Then the user should be redirected to a webUI page with the title "Settings - ownCloud"
+    Then the user should be redirected to a webUI page with the title "Settings - owncloud.online"

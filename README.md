@@ -171,7 +171,7 @@ Meldungen der App stehen im Protokoll der Instanz unter der App-Kennung
 
 ## Herkunft
 
-Diese App ist ein Fork der App „notifications“ der ownCloud GmbH
+Diese App ist ein Fork der Upstream-App „notifications“
 (ursprüngliche Autoren: Joas Schilling, Thomas Müller und weitere). Sie
 wird von der BW-Tech GmbH für owncloud.online und PHP 8.4 gepflegt. Die
 Lizenz ist AGPL-3.0.

@@ -205,7 +205,7 @@ class NotificationMailer {
 	}
 
 	/**
-	 * ownCloud-Sprachcode als lang-Wert: de_DE -> de-DE, sr@latin -> sr-latin
+	 * Sprachcode im Serverformat als lang-Wert: de_DE -> de-DE, sr@latin -> sr-latin
 	 * (wie lib/private/TemplateLayout.php und der Mailkopf des Kerns).
 	 */
 	private static function toLanguageTag(string $languageCode): string {

@@ -87,7 +87,7 @@ Kern mit App 0.7.x zeigt sie ohne Leertext und an falscher Stelle.
 
 ### Changed
 
-- Produktname, Beschreibung und uebersetzte Zeichenketten nennen owncloud.online;
+- Produktname, Beschreibung und übersetzte Zeichenketten nennen owncloud.online;
   Verweise auf Fehlerbereich, Repository und Dokumentation zeigen auf das eigene
   Repository. Screenshots aus fremden Repositories entfernt.
 
@@ -95,31 +95,31 @@ Kern mit App 0.7.x zeigt sie ohne Leertext und an falscher Stelle.
 
 ### Changed
 
-- [#376](https://github.com/owncloud/notifications/pull/376) -  Always return an int from Symfony Command execute method #376 
+- Always return an int from Symfony Command execute method - Upstream #376
 
 
 ## [0.5.4] - 2021-06-30
 
 ### Fixed
 
-- Provide get/list api link resource as absolute url - [#342](https://github.com/owncloud/notifications/issues/342)
+- Provide get/list api link resource as absolute url - Upstream #342
 
 ## [0.5.3] - 2021-06-21
 
 ### Added
 
-- Add command to repair notifications and properly handle mail sending … - [#333](https://github.com/owncloud/notifications/issues/333)
-- Add Mail sender name - [#338](https://github.com/owncloud/notifications/issues/338)
+- Add command to repair notifications and properly handle mail sending … - Upstream #333
+- Add Mail sender name - Upstream #338
 
 ## [0.5.2] - 2020-07-15
 
 ### Fixed
 
-- Use language code to correctly translate mail body of notifications - [#322](https://github.com/owncloud/notifications/issues/322)
+- Use language code to correctly translate mail body of notifications - Upstream #322
 
 ### Added
 
-- Add `Hello` as translatable string to the mail templates - [#320](https://github.com/owncloud/notifications/issues/320)
+- Add `Hello` as translatable string to the mail templates - Upstream #320
 
 ### Changed
 
@@ -129,35 +129,27 @@ Kern mit App 0.7.x zeigt sie ohne Leertext und an falscher Stelle.
 
 ### Added
 
-- Added bell icon in black - [#185](https://github.com/owncloud/notifications/pull/185)
+- Added bell icon in black - Upstream #185
 
 ### Changed
 
-- Drop php 5.6 - [#267](https://github.com/owncloud/notifications/issues/267)
+- Drop php 5.6 - Upstream #267
 
 ### Fixes
 
-- Only set icon in case an icon is available - [#275](https://github.com/owncloud/notifications/issues/275)
+- Only set icon in case an icon is available - Upstream #275
 
 ## [0.4.1]
 
 ### Added
 
-- Notifications can now have an icon - [#104](https://github.com/owncloud/notifications/issues/104)
-- Added occ command to send notification to a user or a group - [#104](https://github.com/owncloud/notifications/issues/104)
+- Notifications can now have an icon - Upstream #104
+- Added occ command to send notification to a user or a group - Upstream #104
 
 ### Fixed
 
-- Make sure buttons stays in place even with long messages - [#114](https://github.com/owncloud/notifications/issues/114)
-- Don't escape link text title - [#111](https://github.com/owncloud/notifications/issues/111)
-- Fix actions and escaping - [#109](https://github.com/owncloud/notifications/issues/109)
-- Move OCS calls to app framework - consumes less resources - [#98](https://github.com/owncloud/notifications/pull/98)
-- Don't use escaped message for browser notification - [#100](https://github.com/owncloud/notifications/pull/100)
-
-[Unreleased]: https://github.com/owncloud/notifications/compare/v0.6.0...master
-[0.6.0]: https://github.com/owncloud/notifications/compare/v0.5.4...v0.6.0
-[0.5.4]: https://github.com/owncloud/notifications/compare/v0.5.3...v0.5.4
-[0.5.3]: https://github.com/owncloud/notifications/compare/v0.5.2...v0.5.3
-[0.5.2]: https://github.com/owncloud/notifications/compare/v0.5.0...v0.5.2
-[0.5.0]: https://github.com/owncloud/notifications/compare/v0.4.1...v0.5.0
-[0.4.1]: https://github.com/owncloud/notifications/compare/v0.4.0...v0.4.1
+- Make sure buttons stays in place even with long messages - Upstream #114
+- Don't escape link text title - Upstream #111
+- Fix actions and escaping - Upstream #109
+- Move OCS calls to app framework - consumes less resources - Upstream #98
+- Don't use escaped message for browser notification - Upstream #100
