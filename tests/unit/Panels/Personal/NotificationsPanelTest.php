@@ -105,4 +105,34 @@ class NotificationsPanelTest extends \Test\TestCase {
 		$this->assertStringContainsString('not possible to get your session', $page);
 		$this->assertStringNotContainsString('<select id="email_sending_option">', $page);
 	}
+
+	public function dataEmailHint() {
+		return [
+			'ohne Adresse' => [null, true],
+			'leere Adresse' => ['', true],
+			'mit Adresse' => ['user@example.com', false],
+		];
+	}
+
+	/**
+	 * @dataProvider dataEmailHint
+	 */
+	public function testEmailHintOnlyWithoutAddress($email, $hintExpected) {
+		$mockedUser = $this->getMockBuilder(IUser::class)
+			->disableOriginalConstructor()
+			->getMock();
+		$mockedUser->method('getUID')->willReturn('testUser');
+		$mockedUser->method('getEMailAddress')->willReturn($email);
+		$this->userSession->method('getUser')->willReturn($mockedUser);
+		$this->optionsStorage->method('getOptions')->willReturn(['email_sending_option' => 'action']);
+
+		$page = $this->notificationsPanel->getPanel()->fetchPage();
+		$hint = 'required to specify an email address';
+		if ($hintExpected) {
+			$this->assertStringContainsString($hint, $page);
+		} else {
+			$this->assertStringNotContainsString($hint, $page);
+		}
+		$this->assertStringContainsString('role="status"', $page);
+	}
 }

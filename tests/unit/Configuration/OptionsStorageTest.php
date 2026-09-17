@@ -103,4 +103,73 @@ class OptionsStorageTest extends \Test\TestCase {
 		]));
 		$this->assertEquals('de_DE', $this->optionsStorage->getUserLanguage('user1'));
 	}
+
+	public function dataGetMailLanguage() {
+		return [
+			'eigene Sprache gewinnt' => ['de_DE', 'fr', 'de_DE'],
+			'ohne eigene Sprache die Standardsprache' => [null, 'de', 'de'],
+			'leere eigene Sprache zählt nicht' => ['', 'de', 'de'],
+			'Sprache ohne Katalog der App: Standardsprache' => ['da', 'de', 'de'],
+			'Sprache ohne Katalog, keine Standardsprache: null' => ['da', '', null],
+			'Standardsprache ohne Katalog zählt nicht' => [null, 'sv', null],
+			'ohne beides bleibt es bei null' => [null, '', null],
+		];
+	}
+
+	/**
+	 * @dataProvider dataGetMailLanguage
+	 */
+	public function testGetMailLanguage($userLanguage, $defaultLanguage, $expected) {
+		$this->config->method('getUserValue')
+			->will($this->returnValueMap([
+				['user1', 'core', 'lang', null, $userLanguage]
+			]));
+		$this->config->method('getSystemValue')
+			->with('default_language', '')
+			->willReturn($defaultLanguage);
+		// Die App hat Kataloge für de, de_DE und fr, nicht für da und sv.
+		$factory = $this->createMock(\OCP\L10N\IFactory::class);
+		$factory->method('languageExists')
+			->willReturnCallback(function ($app, $lang) {
+				return $app === 'notifications' && \in_array($lang, ['en', 'de', 'de_DE', 'fr'], true);
+			});
+		$storage = new OptionsStorage($this->config, $factory);
+		$this->assertSame($expected, $storage->getMailLanguage('user1'));
+	}
+
+	public function dataGetContentLanguage() {
+		return [
+			'Quell-App kennt die eigene Sprache, notifications nicht' => ['sv', 'de', 'files_sharing', 'sv'],
+			'Quell-App kennt sie nicht: Standardsprache' => ['sv', 'de', 'probe', 'de'],
+			'ohne eigene Sprache die Standardsprache' => [null, 'de', 'files_sharing', 'de'],
+			'nichts passt' => ['sv', '', 'probe', null],
+			'ohne App-Kennung null' => ['sv', 'de', '', null],
+		];
+	}
+
+	/**
+	 * @dataProvider dataGetContentLanguage
+	 */
+	public function testGetContentLanguage($userLanguage, $defaultLanguage, $app, $expected) {
+		$this->config->method('getUserValue')
+			->will($this->returnValueMap([
+				['user1', 'core', 'lang', null, $userLanguage]
+			]));
+		$this->config->method('getSystemValue')
+			->with('default_language', '')
+			->willReturn($defaultLanguage);
+		// files_sharing: sv und de; probe: nur de; notifications: kein sv.
+		$kataloge = ['files_sharing' => ['sv', 'de'], 'probe' => ['de'], 'notifications' => ['de']];
+		$factory = $this->createMock(\OCP\L10N\IFactory::class);
+		$factory->method('languageExists')
+			->willReturnCallback(function ($app, $lang) use ($kataloge) {
+				return isset($kataloge[$app]) && \in_array($lang, $kataloge[$app], true);
+			});
+		$storage = new OptionsStorage($this->config, $factory);
+		$this->assertSame($expected, $storage->getContentLanguage('user1', $app));
+		if ($userLanguage === 'sv' && $defaultLanguage === 'de') {
+			// Der Rahmen bleibt bei der Sprache, die notifications kennt.
+			$this->assertSame('de', $storage->getMailLanguage('user1'));
+		}
+	}
 }

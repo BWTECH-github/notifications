@@ -3,6 +3,7 @@
  * @author Thomas Müller <thomas.mueller@tmit.eu>
  *
  * @copyright Copyright (c) 2017, ownCloud GmbH
+ * Modified by BW-Tech GmbH for owncloud.online (PHP 8.4).
  * @license AGPL-3.0
  *
  * This code is free software: you can redistribute it and/or modify
@@ -109,7 +110,9 @@ class Generate extends Command {
 
 			$notification->setObject('admin-notification', (string)$time);
 			if (\method_exists($notification, 'setIcon')) {
-				$notification->setIcon($this->urlGenerator->imagePath('notifications', 'icon.png'));
+				// Neutrales Glockensymbol in Redesign-Farben statt des schwarzen
+				// Lautsprechers; icon.png bleibt für bereits gespeicherte Einträge.
+				$notification->setIcon($this->urlGenerator->imagePath('notifications', 'icon.svg'));
 			}
 
 			$notification->setUser($user);

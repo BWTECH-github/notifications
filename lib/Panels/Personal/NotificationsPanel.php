@@ -3,6 +3,7 @@
  * @author Juan Pablo Villafáñez <jvillafanez@solidgear.es>
  *
  * @copyright Copyright (c) 2018, ownCloud GmbH
+ * Modified by BW-Tech GmbH for owncloud.online (PHP 8.4).
  * @license AGPL-3.0
  *
  * This code is free software: you can redistribute it and/or modify
@@ -76,6 +77,9 @@ class NotificationsPanel implements ISettings {
 		$tmpl = new Template('notifications', 'panels/personal/notifications');
 		$tmpl->assign('validUserObject', $userObject !== null);
 		$tmpl->assign('possibleOptions', $possibleOptions);
+		// Der Hinweis auf die fehlende Adresse stand immer da, auch mit Adresse.
+		$email = $userObject !== null ? $userObject->getEMailAddress() : null;
+		$tmpl->assign('hasEmail', $email !== null && $email !== '');
 		return $tmpl;
 	}
 

@@ -3,6 +3,7 @@
  * @author Joas Schilling <nickvergessen@owncloud.com>
  *
  * @copyright Copyright (c) 2016, ownCloud, Inc.
+ * Modified by BW-Tech GmbH for owncloud.online (PHP 8.4).
  * @license AGPL-3.0
  *
  * This code is free software: you can redistribute it and/or modify
@@ -226,6 +227,13 @@ class EndpointController extends OCSController {
 	 * @return string
 	 */
 	protected function getAbsoluteLink(string $link) {
+		// Ohne Link bleibt es ohne Link. getAbsoluteURL('') lieferte die
+		// Startseite der Instanz, und die Glocke machte jeden Betreff zum
+		// Verweis dorthin.
+		if ($link === '') {
+			return '';
+		}
+
 		$urlComponents = \parse_url($link);
 
 		// Check if already absolute

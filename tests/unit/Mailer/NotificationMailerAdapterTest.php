@@ -118,6 +118,7 @@ class NotificationMailerAdapterTest extends \Test\TestCase {
 		$mockedUser = $this->getMockBuilder(IUser::class)
 			->disableOriginalConstructor()
 			->getMock();
+		$mockedUser->method('isEnabled')->willReturn(true);
 		$mockedUser->method('getEMailAddress')
 			->willReturn(null);
 
@@ -153,6 +154,7 @@ class NotificationMailerAdapterTest extends \Test\TestCase {
 		$mockedUser = $this->getMockBuilder(IUser::class)
 			->disableOriginalConstructor()
 			->getMock();
+		$mockedUser->method('isEnabled')->willReturn(true);
 		$mockedUser->method('getEMailAddress')
 			->willReturn('wiiiiii');
 
@@ -190,6 +192,7 @@ class NotificationMailerAdapterTest extends \Test\TestCase {
 		$mockedUser = $this->getMockBuilder(IUser::class)
 			->disableOriginalConstructor()
 			->getMock();
+		$mockedUser->method('isEnabled')->willReturn(true);
 		$mockedUser->method('getEMailAddress')
 			->willReturn('we@we.we');
 
@@ -235,6 +238,7 @@ class NotificationMailerAdapterTest extends \Test\TestCase {
 		$mockedUser = $this->getMockBuilder(IUser::class)
 			->disableOriginalConstructor()
 			->getMock();
+		$mockedUser->method('isEnabled')->willReturn(true);
 		$mockedUser->method('getEMailAddress')
 			->willReturn('we@we.we');
 
@@ -281,6 +285,7 @@ class NotificationMailerAdapterTest extends \Test\TestCase {
 		$mockedUser = $this->getMockBuilder(IUser::class)
 			->disableOriginalConstructor()
 			->getMock();
+		$mockedUser->method('isEnabled')->willReturn(true);
 		$mockedUser->method('getEMailAddress')
 			->willReturn('we@we.we');
 
@@ -315,6 +320,42 @@ class NotificationMailerAdapterTest extends \Test\TestCase {
 			->method('sendNotification')
 			->with($mockedNotification, 'http://what.ever/oc', 'we@we.we')
 			->will($this->throwException(new \Exception()));
+
+		$this->adapter->sendMail($mockedNotification);
+	}
+
+	public function testSendMailDisabledUser() {
+		$mockedUser = $this->getMockBuilder(IUser::class)
+			->disableOriginalConstructor()
+			->getMock();
+		$mockedUser->method('isEnabled')->willReturn(false);
+		$mockedUser->method('getEMailAddress')->willReturn('we@we.we');
+
+		$mockedAction = $this->getMockBuilder(IAction::class)
+			->disableOriginalConstructor()
+			->getMock();
+
+		$mockedNotification = $this->getMockBuilder(INotification::class)
+			->disableOriginalConstructor()
+			->getMock();
+
+		$mockedNotification->method('getActions')->willReturn([$mockedAction]);
+		$mockedNotification->method('getObjectType')->willReturn('testobject');
+		$mockedNotification->method('getObjectId')->willReturn('467');
+		$mockedNotification->method('getUser')->willReturn('disabledUser');
+
+		$this->userManager->method('get')
+			->with('disabledUser')
+			->willReturn($mockedUser);
+
+		$this->logger->expects($this->once())
+			->method('debug')
+			->with($this->stringContains('the account is disabled'));
+
+		$this->notificationMailer->method('willSendNotification')->willReturn(true);
+		$this->notificationMailer->method('validateEmail')->willReturn(true);
+		$this->notificationMailer->expects($this->never())
+			->method('sendNotification');
 
 		$this->adapter->sendMail($mockedNotification);
 	}

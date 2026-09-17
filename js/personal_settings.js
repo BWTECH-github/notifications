@@ -35,23 +35,62 @@
 
 		parse: function(data) {
 			return data.data.options;
+		},
+
+		/**
+		 * Die Einstellungen gibt es immer, sie werden nie angelegt. Ohne das
+		 * machte Backbone aus dem Speichern ein POST, sobald das Laden der
+		 * Optionen gescheitert war (keine id) - die Route kennt nur GET, PUT und
+		 * PATCH, jede Änderung endete bis zum Neuladen mit 405.
+		 */
+		isNew: function() {
+			return false;
 		}
 	});
 })(OC, OCA);
 
 $(document).ready(function(){
 	var model = new OCA.Notifications.Settings.Model();
+	// Der Server rendert die gespeicherte Auswahl schon in die Seite.
+	var gespeichert = $('#email_sending_option').val();
+	// Mit den Pfeiltasten entstehen mehrere Speichervorgänge kurz
+	// hintereinander. Nur der jüngste entscheidet, was das Feld zeigt; ein
+	// älterer Fehlschlag setzt nicht zurück, was danach gewählt wurde.
+	var letzteAnfrage = 0;
+	var bestaetigt = 0;
+	var letzteGescheitert = false;
 
 	$('#email_sending_option').change(function(){
 		var $element = $(this);
 		var changeMap = {};
-		changeMap[$element.prop('name')] = $element.val();
+		var neu = $element.val();
+		var nr = ++letzteAnfrage;
+		letzteGescheitert = false;
+		changeMap[$element.prop('name')] = neu;
 
 		OC.msg.startSaving('#email_notifications .msg');
 		model.save(changeMap, {patch: true}).done(function(result){
-			OC.msg.finishedSuccess('#email_notifications .msg', result.data.message);
+			if (nr > bestaetigt) {
+				bestaetigt = nr;
+				gespeichert = neu;
+			}
+			if (nr === letzteAnfrage) {
+				OC.msg.finishedSuccess('#email_notifications .msg', result.data.message);
+			} else if (letzteGescheitert) {
+				// Der jüngste Versuch scheiterte, dieser ältere kam durch.
+				$element.val(gespeichert);
+			}
 		}).fail(function(result){
-			OC.msg.finishedError('#email_notifications .msg', result.responseJSON.data.message);
+			if (nr !== letzteAnfrage) {
+				return;
+			}
+			letzteGescheitert = true;
+			// Das Feld zeigte sonst weiter den nicht gespeicherten Wert.
+			$element.val(gespeichert);
+			// Ohne JSON (412, HTML-Fehlerseite, Status 0) warf der Zugriff einen
+			// TypeError, und "Speichern…" blieb stehen.
+			var message = result && result.responseJSON && result.responseJSON.data && result.responseJSON.data.message;
+			OC.msg.finishedError('#email_notifications .msg', message || t('notifications', 'The setting could not be saved.'));
 		});
 	}).prop('disabled', true);
 

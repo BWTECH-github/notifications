@@ -3,6 +3,7 @@
  * @author Juan Pablo Villafáñez <jvillafanez@solidgear.es>
  *
  * @copyright Copyright (c) 2018, ownCloud GmbH
+ * Modified by BW-Tech GmbH for owncloud.online (PHP 8.4).
  * @license AGPL-3.0
  *
  * This code is free software: you can redistribute it and/or modify
@@ -79,6 +80,17 @@ class NotificationMailerAdapter {
 			return;
 		}
 
+		// Gesperrte Konten bekamen weiter Mails - samt Dateinamen und
+		// Ankündigungstexten, für eine Instanz, an der sie sich nicht mehr
+		// anmelden können. activity lässt sie ebenfalls aus.
+		if (!$userObject->isEnabled()) {
+			$this->logger->debug(
+				"notification $nObjectType#$nObjectId won't be sent to $targetUser via email: the account is disabled",
+				['app' => $this->appName]
+			);
+			return;
+		}
+
 		$targetEmail = $userObject->getEMailAddress();
 		if ($targetEmail === null) {
 			$this->logger->warning(
@@ -92,11 +104,16 @@ class NotificationMailerAdapter {
 			try {
 				$serverUrl = $this->urlGenerator->getAbsoluteURL('/');
 				$this->sender->sendNotification($notification, $serverUrl, $targetEmail);
-			} catch (\Exception $ex) {
+			} catch (\Throwable $ex) {
+				// Auch Fehler aus dem Rendern der Mail (TypeError, fehlendes
+				// Blatt) dürfen notify() des Auslösers nicht abbrechen.
 				$this->logger->logException($ex, ['app' => $this->appName]);
 			}
 		} else {
-			$this->logger->warning("notification $nObjectType#$nObjectId can't be sent to $targetUser via email: user's email \"$targetEmail\" isn't valid");
+			$this->logger->warning(
+				"notification $nObjectType#$nObjectId can't be sent to $targetUser via email: user's email isn't valid",
+				['app' => $this->appName]
+			);
 		}
 	}
 }

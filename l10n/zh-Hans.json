@@ -11,12 +11,22 @@
     "Notify only when an action is required" : "當需要執行動作時才通知",
     "Notify about all events" : "通知所有事件",
     "Choose an option" : "選擇一個選項",
-    "Hello," : "您好,",
-    "See <a href=\"%s\">%s</a> on %s for more information" : "看<a href=\"%s\">%s</a>上%s了解更多信息",
-    "See %s on %s for more information" : "看%s上%s了解更多信息",
     "Mail Notifications" : "郵件通知",
     "You can choose to be notified about events via mail. Some events are informative, others require an action (like accept/decline). Select your preference below:" : "您可以选择通过邮件来通知您事件。 有些事件包含信息，有些则需要进行操作（如“接受”或“拒绝”）。 在下面选择您的偏好：",
     "It was not possible to get your session. Please, try reloading the page or logout and login again" : "无法获取您的会话。请尝试重新载入页面或注销后重新登录。",
-    "To be able to receive mail notifications it is required to specify an email address for your account." : "若要接收邮件通知，必须指定您账户的邮件地址。"
+    "To be able to receive mail notifications it is required to specify an email address for your account." : "若要接收邮件通知，必须指定您账户的邮件地址。",
+    "Loading notifications …" : "正在加载通知…",
+    "Notifications could not be loaded." : "无法加载通知。",
+    "Try again" : "重试",
+    "Notification dismissed" : "通知已忽略",
+    "The notification could not be dismissed." : "无法忽略通知。",
+    "The action could not be completed." : "无法完成操作。",
+    "Done: {action}" : "已完成：{action}",
+    "New notification: {subject}" : "新通知：{subject}",
+    "New notifications: {count}" : "新通知：{count}",
+    "The setting could not be saved." : "无法保存设置。",
+    "Open in %s" : "在 %s 中打开",
+    "Open in %s:" : "在 %s 中打开：",
+    "If the button does not work, open this address:" : "如果按钮无法使用，请打开此地址："
 },"pluralForm" :"nplurals=1; plural=0;"
 }

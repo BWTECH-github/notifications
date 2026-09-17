@@ -4,13 +4,13 @@
 	<id>notifications</id>
 	<name>Notifications</name>
 	<summary>Notification system for internal events</summary>
-	<description>This application adds an internal notification system to an owncloud.online instance. Notifications are triggered by apps like the Announcement Center or Custom Groups and displayed via a bell indicator in the WebUI as well as via the owncloud.online clients. This is a PHP 8.4 fork maintained by BW-Tech GmbH for owncloud.online.</description>
+	<description>This application adds an internal notification system to an owncloud.online instance. Notifications are triggered by apps like Announcements or Custom Groups and shown under the bell in the header of the web interface; clients can read them through the OCS API. Mail notifications are configured per user under Settings → Notifications. Version 1.0.0 is built for the redesigned owncloud.online 11.1 web interface. This is a PHP 8.4 fork maintained by BW-Tech GmbH for owncloud.online.</description>
 
 	<category>tools</category>
 
 	<licence>AGPL</licence>
 	<author>Joas Schilling, Thomas Müller, modified by BW-Tech GmbH</author>
-	<version>0.7.3</version>
+	<version>1.0.0</version>
 
 	<types>
 		<logging/>
@@ -31,7 +31,10 @@
 	</settings>
 
 	<dependencies>
-		<owncloud min-version="11" max-version="11.99" />
+		<!-- 11.1: Mailrahmen (html.mail.header/button/end) und der Einstellungsbereich
+		     "Benachrichtigungen" gibt es erst im Redesign-Kern. Unter 11.0.x würde
+		     jede Benachrichtigungsmail am fehlenden Blatt scheitern. -->
+		<owncloud min-version="11.1" max-version="11.99" />
 		<php min-version="8.4" />
 	</dependencies>
 	<use-migrations>true</use-migrations>

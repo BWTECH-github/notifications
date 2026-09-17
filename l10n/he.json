@@ -1,7 +1,7 @@
 { "translations": {
     "Notifications" : "התראות",
     "No notifications" : "אין התראות",
-    "Dismiss" : "שחרור",
+    "Dismiss" : "סגירה",
     "Admin notifications" : "הודעות מנהל",
     "Unknown user session. It is not possible to set the option" : "הפעלת המשתמש אינה ידועה. לא ניתן לשנות אפשרות זו",
     "Option not supported" : "האפשרות אינה נתמכת",
@@ -11,12 +11,22 @@
     "Notify only when an action is required" : "יש להודיע כאשר נדרשת פעולה",
     "Notify about all events" : "להודיע על כל האירועים",
     "Choose an option" : "בחר אפשרות",
-    "Hello," : "שלום,",
-    "See <a href=\"%s\">%s</a> on %s for more information" : "מידע נוסף ב- <a href=\"%s\">%s</a> מ- %s ",
-    "See %s on %s for more information" : "מידע נוסף ב- %s מ- %s ",
     "Mail Notifications" : "הודעות בדוא״ל",
     "You can choose to be notified about events via mail. Some events are informative, others require an action (like accept/decline). Select your preference below:" : "ניתן לבחור לקבל הודעות על אירועים דרך דוא״ל. חלק מהאירועים נשלחים למטרות ידיעה בלבד, חלקם דורשים פעילות מסוימת (לאשר/לדחות). נא לבחור את ההעדפה שלך להלן:",
     "It was not possible to get your session. Please, try reloading the page or logout and login again" : "לא הייתה אפשרות לקבל את ההפעלה שלך. נא לנסות לטעון את העמוד מחדש או לצאת ולהיכנס שוב.",
-    "To be able to receive mail notifications it is required to specify an email address for your account." : "כדי לקבל הודעות דוא״ל יש לציין כתובת דוא״ל לחשבון שלך."
+    "To be able to receive mail notifications it is required to specify an email address for your account." : "כדי לקבל הודעות דוא״ל יש לציין כתובת דוא״ל לחשבון שלך.",
+    "Loading notifications …" : "טוען התראות …",
+    "Notifications could not be loaded." : "לא ניתן לטעון את ההתראות.",
+    "Try again" : "נסה שוב",
+    "Notification dismissed" : "ההתראה נסגרה",
+    "The notification could not be dismissed." : "לא ניתן לסגור את ההתראה.",
+    "The action could not be completed." : "לא ניתן להשלים את הפעולה.",
+    "Done: {action}" : "בוצע: {action}",
+    "New notification: {subject}" : "התראה חדשה: {subject}",
+    "New notifications: {count}" : "התראות חדשות: {count}",
+    "The setting could not be saved." : "לא ניתן לשמור את ההגדרה.",
+    "Open in %s" : "פתח ב־%s",
+    "Open in %s:" : "פתח ב־%s:",
+    "If the button does not work, open this address:" : "אם הכפתור לא עובד, פתח את הכתובת הזו:"
 },"pluralForm" :"nplurals=3; plural=(n == 1 && n % 1 == 0) ? 0 : (n == 2 && n % 1 == 0) ? 1: 2;"
 }

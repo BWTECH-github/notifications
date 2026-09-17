@@ -3,6 +3,7 @@
  * @author Juan Pablo Villafáñez <jvillafanez@solidgear.es>
  *
  * @copyright Copyright (c) 2018, ownCloud GmbH
+ * Modified by BW-Tech GmbH for owncloud.online (PHP 8.4).
  * @license AGPL-3.0
  *
  * This code is free software: you can redistribute it and/or modify
@@ -96,9 +97,41 @@ class NotificationMailer {
 		}
 
 		$targetUser = $notification->getUser();
-		$language = $this->optionsStorage->getUserLanguage($targetUser);
+		// Rahmen (Schaltfläche, Hinweis) aus dem Katalog dieser App, Betreff und
+		// Nachricht aus dem der auslösenden App - beide können verschiedene
+		// Sprachen abdecken.
+		$language = $this->optionsStorage->getMailLanguage($targetUser);
+		$contentLanguage = $this->optionsStorage->getContentLanguage($targetUser, $notification->getApp());
 
-		$notification = $this->manager->prepare($notification, $language);
+		// lang für Betreff bzw. Nachricht, wenn sie in einer anderen Sprache
+		// stehen als der Rahmen (WCAG 3.1.2); leer heißt: Sprache des Rahmens.
+		$subjectLang = '';
+		$messageLang = '';
+		if ($contentLanguage === null || $contentLanguage === $language) {
+			$notification = $this->manager->prepare($notification, $language);
+		} else {
+			/*
+			 * Ein vorhandener Katalog der auslösenden App heißt nicht, dass er
+			 * diese Meldung übersetzt: files_sharing hat da.json, aber ohne die
+			 * Freigabetexte. Mit der Kontosprache vorbereitet kam dann englischer
+			 * Text als lang="da" an, statt wie bisher in der Rahmensprache. Die
+			 * englische Fassung dient als Vergleich - was ihr gleicht, ist nicht
+			 * übersetzt (oder frei geschriebener Text wie eine Ankündigung).
+			 */
+			$istEnglisch = \strncmp($contentLanguage, 'en', 2) === 0;
+			$reference = $istEnglisch ? null : $this->manager->prepare(clone $notification, 'en');
+			$prepared = $this->manager->prepare($notification, $contentLanguage);
+			$subjectTranslated = $istEnglisch || $prepared->getParsedSubject() !== $reference->getParsedSubject();
+			$messageTranslated = $istEnglisch || $prepared->getParsedMessage() !== $reference->getParsedMessage();
+			if ($subjectTranslated || $messageTranslated) {
+				$notification = $prepared;
+				$tag = self::toLanguageTag($contentLanguage);
+				$subjectLang = $subjectTranslated ? $tag : '';
+				$messageLang = $messageTranslated ? $tag : '';
+			} else {
+				$notification = $this->manager->prepare($notification, $language);
+			}
+		}
 
 		$emailMessage = $this->mailer->createMessage();
 		$emailMessage->setTo([$emailAddress]);
@@ -112,14 +145,20 @@ class NotificationMailer {
 		} elseif (!isset($urlComponents['host'])) {
 			$notificationLink = $this->urlGenerator->getAbsoluteURL($notificationLink);
 		}
+		// Die Mail geht unter der Marke der Instanz hinaus - als Ziel der
+		// Schaltfläche nur http(s), alles andere führt auf die Instanz.
+		$scheme = \strtolower((string)\parse_url($notificationLink, PHP_URL_SCHEME));
+		if ($scheme !== 'http' && $scheme !== 'https') {
+			$notificationLink = $serverUrl;
+		}
 
 		$parsedSubject = $notification->getParsedSubject();
 		$parsedMessage = $notification->getParsedMessage();
 
 		$emailMessage->setSubject($parsedSubject);
 
-		$htmlText = $this->getMailBody($parsedMessage, $notificationLink, 'mail/htmlmail', $language);
-		$plainText = $this->getMailBody($parsedMessage, $notificationLink, 'mail/plaintextmail', $language);
+		$htmlText = $this->getMailBody($parsedSubject, $parsedMessage, $notificationLink, 'mail/htmlmail', $language, $subjectLang, $messageLang);
+		$plainText = $this->getMailBody($parsedSubject, $parsedMessage, $notificationLink, 'mail/plaintextmail', $language, $subjectLang, $messageLang);
 
 		$emailMessage->setPlainBody($plainText);
 		$emailMessage->setHtmlBody($htmlText);
@@ -165,10 +204,21 @@ class NotificationMailer {
 		}
 	}
 
-	private function getMailBody($message, $serverUrl, $targetTemplate, $languageCode) {
+	/**
+	 * ownCloud-Sprachcode als lang-Wert: de_DE -> de-DE, sr@latin -> sr-latin
+	 * (wie lib/private/TemplateLayout.php und der Mailkopf des Kerns).
+	 */
+	private static function toLanguageTag(string $languageCode): string {
+		return \str_replace(['_', '@'], '-', $languageCode);
+	}
+
+	private function getMailBody($subject, $message, $link, $targetTemplate, $languageCode, $subjectLang = '', $messageLang = '') {
 		$tmpl = new Template('notifications', $targetTemplate, '', false, $languageCode);
-		$tmpl->assign('message', $message);
-		$tmpl->assign('serverUrl', $serverUrl);
+		$tmpl->assign('subject', (string)$subject);
+		$tmpl->assign('message', (string)$message);
+		$tmpl->assign('link', $link);
+		$tmpl->assign('subjectLang', (string)$subjectLang);
+		$tmpl->assign('messageLang', (string)$messageLang);
 		return $tmpl->fetchPage();
 	}
 }

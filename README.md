@@ -13,8 +13,16 @@ Benachrichtigungen der aufsetzenden Apps unsichtbar.
 - Sie nimmt Benachrichtigungen anderer Apps entgegen und speichert sie in
   der Datenbanktabelle `oc_notifications`.
 - Sie zeigt die Benachrichtigungen in der Weboberfläche im Menü hinter dem
-  Glockensymbol an. Die Oberfläche fragt alle 30 Sekunden nach neuen
-  Einträgen.
+  Glockensymbol rechts in der Kopfzeile an, die neueste zuerst. Die Glocke
+  nennt die Anzahl (sichtbar als Zähler und im Namen der Schaltfläche) und
+  sagt neue Einträge über eine Statusmeldung für Sprachausgaben an.
+- Die Oberfläche fragt alle 30 Sekunden nach neuen Einträgen, solange der
+  Tab sichtbar ist. In einem unsichtbaren Tab fragt sie nur, wenn im Browser
+  Benachrichtigungen erlaubt sind, und dann alle zwei Minuten; neue Einträge
+  erscheinen dort als Browser-Benachrichtigung, mehrere als eine
+  Sammelmeldung. Ist `session_keepalive` ausgeschaltet, fragt sie nur,
+  während jemand die Seite bedient, damit Sitzungen weiter ablaufen. Bei
+  Fehlern verlängert sie den Abstand bis auf fünf Minuten.
 - Enthält eine Benachrichtigung Aktionen (etwa Annehmen oder Ablehnen),
   werden diese als Schaltflächen im Menü dargestellt.
 - Sie versendet Benachrichtigungen zusätzlich per E-Mail. Ob und wann das
@@ -26,9 +34,10 @@ Benachrichtigungen der aufsetzenden Apps unsichtbar.
 - Wird ein Benutzerkonto gelöscht, entfernt die App dessen
   Benachrichtigungen aus der Datenbank.
 
-Das Glockensymbol wird nur eingeblendet, wenn Benachrichtigungen vorliegen.
-Registriert keine installierte App Benachrichtigungen, antwortet der
-Endpunkt mit „204 No Content“ und die Oberfläche stellt die Abfrage ein.
+Das Glockensymbol steht immer in der Kopfzeile; ohne Einträge zeigt das Menü
+„Keine Benachrichtigungen“. Registriert keine installierte App
+Benachrichtigungen, antwortet der Endpunkt mit „204 No Content“, die
+Oberfläche stellt die Abfrage ein und entfernt die Glocke.
 
 ### Apps, die darauf aufsetzen
 
@@ -45,7 +54,15 @@ dieser App:
 
 ## Voraussetzungen
 
-- owncloud.online 11 (unterstützt bis Version 11.99)
+- owncloud.online 11.1 oder neuer (Redesign; unterstützt bis Version 11.99).
+  Ab Version 1.0.0 nutzt die App den Mailrahmen und den Einstellungsbereich
+  „Benachrichtigungen“ des Redesign-Kerns. Für owncloud.online 11.0.x bleibt
+  Version 0.7.x (Zweig `main`).
+- App 1.0.0 und der Redesign-Kern ohne die früheren Glocken-Sonderregeln
+  (CSS-Maske, Leertext-Skript, Umhängen der Glocke) werden nur gemeinsam
+  ausgeliefert: Ein älterer Redesign-Kern verschiebt und überzeichnet die
+  neue Glocke, ein neuer Kern mit App 0.7.x zeigt die Glocke ohne Leertext
+  und an falscher Stelle.
 - PHP 8.4
 - Für den Versand per E-Mail: eine funktionsfähige E-Mail-Konfiguration der
   Instanz sowie eine hinterlegte, gültige E-Mail-Adresse im jeweiligen
@@ -62,7 +79,7 @@ Regel bereits enthalten und aktiviert. Der einfachere Weg für Installation
 und Aktualisierung ist der Markt in der Administration. Wenn Sie die App
 von Hand einspielen möchten:
 
-    cd /var/www/owncloud.online/apps
+    cd /var/www/owncloud.online/apps-external
     git clone https://github.com/BWTECH-github/notifications.git
     cd notifications
     composer install --no-dev
@@ -75,13 +92,14 @@ Die App kennt eine einzige Einstellung, und diese wird je Benutzerkonto
 gesetzt. Eine instanzweite Vorgabe gibt es nicht; es gibt auch keinen
 Bereich in der Administration.
 
-Zu finden ist sie unter „Einstellungen“ → „Persönlich“ → „Allgemein“ im
-Abschnitt „E-Mail-Benachrichtigungen“.
+Zu finden ist sie unter „Einstellungen“ → „Benachrichtigungen“ auf der Karte
+„E-Mail-Benachrichtigungen“. Fehlt im Profil eine E-Mail-Adresse, weist die
+Karte darauf hin.
 
 | Auswahl                                    | Gespeicherter Wert |
 | ------------------------------------------ | ------------------ |
 | Nicht per E-Mail benachrichtigen           | `never`            |
-| Nur benachrichtigen wenn Aktion notwendig ist | `action`        |
+| Nur benachrichtigen, wenn eine Aktion nötig ist | `action`      |
 | Über alle Ereignisse benachrichtigen       | `always`           |
 
 Der Wert wird als Benutzer-Einstellung unter der App-Kennung
@@ -90,7 +108,21 @@ Auswahl gilt `action`: Es werden nur Benachrichtigungen per E-Mail
 verschickt, die eine Aktion enthalten.
 
 Die Sprache der E-Mail richtet sich nach der Spracheinstellung des
-Empfängers (Benutzer-Einstellung `lang` der App-Kennung `core`).
+Empfängers (Benutzer-Einstellung `lang` der App-Kennung `core`). Hat er keine
+gewählt oder bringt die App für seine Sprache keine Übersetzung mit, gilt
+`default_language` aus der `config.php` (ebenfalls nur mit Übersetzung);
+passt auch die nicht, entscheidet wie bisher die Sprache des auslösenden
+Vorgangs.
+
+Betreff und Nachricht stammen aus der App, die die Benachrichtigung erzeugt
+hat (etwa `files_sharing`), und folgen derselben Reihenfolge – geprüft wird
+aber deren Übersetzung. Ein Konto mit Schwedisch bekommt eine Freigabe also
+schwedisch, auch wenn der Rahmen mangels schwedischer Übersetzung dieser App
+in `default_language` steht; der Inhalt trägt dann ein eigenes `lang`.
+
+Die Mail nutzt den Mailrahmen der Instanz (Logo eingebettet, Schaltfläche zum
+Öffnen) und enthält Betreff, Nachricht und Verweis. Gesperrte Benutzerkonten
+erhalten keine Mails.
 
 ## Kommandozeile
 
@@ -125,11 +157,11 @@ anderes Thema als `relativeLinks` wird mit „Invalid subject“ abgewiesen.
 
 | Symptom | Ursache | Abhilfe |
 | ------- | ------- | ------- |
-| Kein Glockensymbol in der Kopfzeile | Es liegen keine Benachrichtigungen vor; das Symbol erscheint nur bei vorhandenen Einträgen | Kein Fehler. Zum Prüfen mit `notifications:generate` eine Testbenachrichtigung erzeugen |
-| Symbol bleibt aus, obwohl Meldungen erwartet werden | Keine installierte App registriert Benachrichtigungen; der Endpunkt antwortet mit 204, die Oberfläche stellt die Abfrage ein | Die erzeugende App aktivieren, Seite neu laden |
+| Kein Glockensymbol in der Kopfzeile | Keine installierte App registriert Benachrichtigungen; der Endpunkt antwortet mit 204, die Oberfläche entfernt die Glocke | Die erzeugende App aktivieren, Seite neu laden |
+| Menü zeigt „Die Benachrichtigungen konnten nicht geladen werden.“ | Der erste Abruf ist gescheitert (Netz, Wartungsmodus) | „Erneut versuchen“ im Menü; die Oberfläche versucht es zusätzlich selbst in wachsenden Abständen |
 | Benachrichtigungen erscheinen verzögert | Die Oberfläche fragt im Abstand von 30 Sekunden ab | Abwarten oder die Seite neu laden |
 | Nichts in Oberfläche und Clients | Die App ist deaktiviert; der Endpunkt antwortet mit 404 | `occ app:enable notifications` |
-| Keine E-Mail, obwohl die Meldung angezeigt wird | Persönliche Einstellung steht auf `never`, oder auf `action` und die Meldung enthält keine Aktion | Einstellung im persönlichen Bereich prüfen |
+| Keine E-Mail, obwohl die Meldung angezeigt wird | Persönliche Einstellung steht auf `never`, oder auf `action` und die Meldung enthält keine Aktion; oder das Benutzerkonto ist gesperrt | Einstellung unter „Einstellungen“ → „Benachrichtigungen“ prüfen; im Protokoll steht bei gesperrten Konten „the account is disabled“ (Stufe Debug) |
 | Keine E-Mail, im Protokoll steht „email for the user isn't set“ oder „isn't valid“ | Im Benutzerkonto fehlt die E-Mail-Adresse oder sie ist ungültig | Gültige Adresse im Benutzerkonto eintragen |
 | Verweise zeigen auf die frühere Adresse der Instanz | Die Verweise wurden absolut gespeichert | `occ notifications:repairNotifications relativeLinks` |
 | `notifications:generate` bricht mit „Either user or group needs to be given.“ ab | Weder `--user` noch `--group` angegeben | Einen der beiden Schalter setzen |

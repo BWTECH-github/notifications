@@ -1,37 +1,66 @@
-<table cellspacing="0" cellpadding="0" border="0" width="100%">
-<tr><td>
-<table cellspacing="0" cellpadding="0" border="0" width="600px">
-<tr>
-<td colspan="2" style="padding:0;">
-<table cellspacing="0" cellpadding="0" border="0" width="100%">
-<tr><td style="height:4px;line-height:4px;font-size:0;background-color:<?php p($theme->getMailHeaderColor());?>;">&nbsp;</td></tr>
-<tr><td align="center" style="padding:26px 0 14px;background-color:#ffffff;"><img src="<?php p(\OC::$server->getURLGenerator()->getAbsoluteURL(image_path('', 'logo-mail.gif'))); ?>" alt="<?php p($theme->getName()); ?>" style="display:block;margin:0 auto;border:0;max-width:210px;height:auto;"></td></tr>
-</table>
-</td>
-</tr>
-<tr><td colspan="2">&nbsp;</td></tr>
-<tr>
-<td width="20px">&nbsp;</td>
-<td style="font-weight:normal; font-size:0.8em; line-height:1.2em; font-family:verdana,'arial',sans;">
-<?php p($l->t('Hello,')); ?>
-<br>
-<?php if ($_['message'] !== ''): ?>
-	<?php p($_['message']); ?>
-	<br><br>
-<?php endif; ?>
-<?php print_unescaped($l->t('See <a href="%s">%s</a> on %s for more information', [$_['serverUrl'], $_['serverUrl'], $theme->getName()])); ?>
-</td>
-</tr>
-<tr><td colspan="2">&nbsp;</td></tr>
-<tr>
-<td width="20px">&nbsp;</td>
-<td style="font-weight:normal; font-size:0.8em; line-height:1.2em; font-family:verdana,'arial',sans;">
-<?php print_unescaped($this->inc('html.mail.footer', ['app' => 'core'])); ?>
-</td>
-</tr>
-<tr>
-<td colspan="2">&nbsp;</td>
-</tr>
-</table>
-</td></tr>
-</table>
+<?php
+/**
+ * HTML-Fassung der Benachrichtigungsmail.
+ *
+ * @var \OCP\IL10N $l
+ * @var array $_
+ *
+ * @copyright Copyright (c) 2026, BW-Tech GmbH
+ *
+ * Modified by BW-Tech GmbH on 2026-09-16.
+ * Changes:
+ *   - use the shared owncloud.online mail frame instead of an own 2018 layout
+ *   - subject and line breaks of the message, link as a button (escaped)
+ *
+ * Die Mail trug bis hierher ihren eigenen Rahmen: 600-Pixel-Tabelle, Verdana
+ * in 0,8em, das Logo über eine absolute Adresse der Instanz - außerhalb des
+ * Netzes blieb der Bildrahmen leer - und den Link roh im Text. Dieselbe
+ * Ankündigung kam so in zwei verschiedenen Rahmen an: über activity im
+ * Kernrahmen, über diese App im alten. Rahmen, Schrift und Logo (per
+ * Content-ID) kommen jetzt aus dem Kern; hier steht nur der Inhalt.
+ *
+ * 'app' => 'core' ist Pflicht: inc() lädt das Blatt im Template-Objekt dieser
+ * App und sucht die Bausteine sonst unter apps-external/notifications.
+ */
+
+print_unescaped($this->inc('html.mail.header', ['app' => 'core']));
+/*
+ * Betreff und Nachricht stammen aus der auslösenden App und können in einer
+ * anderen Sprache vorliegen als der Rahmen; dann tragen sie ein eigenes lang.
+ * Getrennt, weil etwa eine Ankündigung einen übersetzten Betreff, aber frei
+ * geschriebenen Text hat - der bleibt in der Sprache des Rahmens.
+ */
+$langAttribut = function ($schluessel) use ($_) {
+	return isset($_[$schluessel]) && $_[$schluessel] !== ''
+		? ' lang="' . \OCP\Util::sanitizeHTML($_[$schluessel]) . '"'
+		: '';
+};
+?>
+<p<?php print_unescaped($langAttribut('subjectLang')); ?> style="margin:0 0 12px;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:16px;font-weight:600;line-height:1.4;color:#1f2733;">
+	<?php p($_['subject']); ?>
+</p>
+<?php if ($_['message'] !== '') { ?>
+<p<?php print_unescaped($langAttribut('messageLang')); ?> style="margin:0 0 20px;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.55;color:#1f2733;">
+	<?php
+	/*
+	 * Erst maskieren, dann Umbrüche setzen: mehrzeilige Ankündigungen kamen
+	 * sonst als ein durchlaufender Block an.
+	 */
+	print_unescaped(\nl2br(\OCP\Util::sanitizeHTML($_['message']), false));
+	?>
+</p>
+<?php } ?>
+<?php
+/*
+ * Die Beschriftung kommt fertig übersetzt in den Baustein: dort gilt das
+ * l10n-Objekt des Kerns, und 'hint' muss immer mit (html.mail.button.php liest
+ * es ohne isset).
+ */
+print_unescaped($this->inc('html.mail.button', [
+	'app' => 'core',
+	'url' => $_['link'],
+	'label' => $l->t('Open in %s', [$theme->getName()]),
+	'hint' => $l->t('If the button does not work, open this address:'),
+]));
+
+print_unescaped($this->inc('html.mail.end', ['app' => 'core']));

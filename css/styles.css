@@ -1,166 +1,344 @@
-.notification {
+/**
+ * Glocke und Benachrichtigungsliste.
+ *
+ * @copyright Copyright (c) 2026, BW-Tech GmbH
+ *
+ * Modified by BW-Tech GmbH on 2026-09-16.
+ * Changes:
+ *   - rewritten for the redesigned header: design tokens, scrollable list,
+ *     visible focus, always visible dismiss button, counter badge, states
+ *
+ * Alles hängt an "#header .notifications": die Kopfleiste des Kerns stylt
+ * Knöpfe mit Regeln der Form "#header button" - Bauteilregeln ohne Kennung
+ * verlören dagegen still. Farben kommen aus core/css/owncloud-tokens.css, mit
+ * den dort festgelegten Werten als Rückfall.
+ *
+ * Keine Übergänge an :hover - sie ließen den Zeiger im Redesign messbar
+ * nachhängen (72 statt 32 ms).
+ */
+
+#header .notifications {
+	position: relative;
 	display: flex;
-	padding: 15px;
-	transition: background .125s;
+	align-items: center;
 }
 
-.notification:not(:last-child) {
-	border-bottom: 1px solid rgb(238, 238, 238);
+/* --- Glocke ------------------------------------------------------------- */
+
+#header .notifications .notifications-button {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 40px;
+	height: 40px;
+	min-height: 40px;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: transparent;
+	box-shadow: none;
+	color: var(--oco-navy, #041e42);
+	cursor: pointer;
+	opacity: 1;
+	/* Ältere Redesign-Kerne maskierten den Knopf mit dem alten Glockenbild -
+	   die Maske schnitt Zähler und Fokusrahmen weg. */
+	-webkit-mask: none;
+	mask: none;
+	transform: none;
 }
 
-.notification-container {
-	background-color: white;
+#header .notifications .notifications-button:hover,
+#header .notifications .notifications-button[aria-expanded="true"] {
+	background-color: var(--oco-neutral-bg, #EEF2F8);
+}
+
+#header .notifications .notifications-bell {
+	display: block;
+	width: 20px;
+	height: 20px;
+}
+
+/* Zähler statt Farbpunkt: die Anzahl ist sichtbar und steht zusätzlich im
+   Namen der Schaltfläche. Weißer Rand trennt ihn von der Glocke. */
+#header .notifications .notifications-badge {
+	position: absolute;
+	top: 2px;
+	right: 0;
+	min-width: 18px;
+	height: 18px;
+	padding: 0 5px;
+	box-sizing: border-box;
+	border: 2px solid var(--oco-surface, #ffffff);
+	border-radius: 9px;
+	background-color: var(--oco-danger-ink, #b23b3b);
+	color: #ffffff;
+	font: 700 10px/14px var(--oco-font-ui, system-ui, sans-serif);
+	text-align: center;
+	pointer-events: none;
+}
+
+#header .notifications .notifications-badge.hidden {
+	display: none;
+}
+
+/* --- Liste -------------------------------------------------------------- */
+
+#header .notifications .notification-container {
 	display: none;
 	position: absolute;
-	right: 50px;
-	top: 45px;
-	width: 350px;
-	min-height: 100px;
-	max-height: 260px;
-	border-radius: 0 0 3px 3px;
-	border: 1px solid rgb(238, 238, 238);;
+	top: calc(100% + 8px);
+	right: 0;
+	/* Über dem Upload-Panel des Kerns (.oco-uploads, 2600), das unten rechts
+	   sonst die letzten Meldungen samt Tastaturfokus verdeckte; unter
+	   Reiterleiste (2800), Schleier (2900), Seitenleiste (3000) und
+	   Detail-Vollbild (3200). */
+	z-index: 2700;
+	width: 380px;
+	max-width: calc(100vw - 32px);
+	/* Rollen statt abschneiden: vorher war bei 260 px Schluss, und was
+	   darunter lag, erreichte weder Maus noch Finger. */
+	max-height: min(70vh, 520px);
+	overflow-x: hidden;
+	overflow-y: auto;
+	/* Die Überschrift klebt oben im Rollbereich. Ohne diesen Abstand legte der
+	   Browser beim Rückwärts-Tabben den Fokus genau unter sie (WCAG 2.4.11). */
+	scroll-padding-top: 56px;
+	box-sizing: border-box;
+	border: 1px solid rgba(4, 30, 66, .08);
+	border-radius: var(--oco-radius-card, 12px);
+	background-color: var(--oco-surface, #ffffff);
+	box-shadow: 0 12px 28px rgba(4, 30, 66, .16), 0 2px 6px rgba(4, 30, 66, .06);
+	text-align: left;
 }
 
-.notification-container .emptycontent h2 {
-	font-weight: 300;
-	font-size: 16px;
-}
-
-/* Fill width on mobile */
-@media (max-width: 500px) {
-	.notification-container {
-		right: 5%;
-		width: 90%;
-	}
-}
-
-.notification {
-	color: black;
-	position: relative;
-}
-
-.notification .notification-empty {
-	color: #999;
-}
-
-.notification > .notification-delete {
-	position: absolute;
-	top: 8px;
-	right: 8px;
-	opacity: 0.7;
-	transition: opacity .25s;
-	text-indent: -9999px;
-	background-color: transparent;
+#header .notifications .notifications-heading {
+	position: sticky;
+	top: 0;
+	z-index: 1;
 	margin: 0;
-	padding: 0;
+	padding: 14px 16px 10px;
+	border-bottom: 1px solid var(--oco-border-row, #f4f6f9);
+	background-color: var(--oco-surface, #ffffff);
+	color: var(--oco-navy, #041e42);
+	font: 600 14px/1.4 var(--oco-font-ui, system-ui, sans-serif);
+	/* Ziel des Fokus nach "Erneut versuchen": der Außenring des Kerns läge
+	   außerhalb des Rollbereichs und bliebe nur als Strich unten sichtbar. */
+	--_oco-fokus-abstand: var(--oco-focus-offset-feld, -2px);
 }
 
-.notification:not(:hover):not(:focus-within) > .notification-delete {
-	opacity: 0;
-}
-
-/* Reveal the dismiss control for keyboard users on focus */
-.notification:focus-within > .notification-delete,
-.notification-delete:focus {
-	opacity: 1;
-}
-
-.notification:hover {
-	background-color: #f8f8f8;
-}
-
-.notification-delete:hover {
-	opacity: 0.8 !important;
-	cursor: pointer;
-}
-
-.notification-delete img, .notifications-button img {
-	cursor: pointer;
-}
-
-.notifications-button {
-	position: relative;
-	float: right;
-	width: 21px;
-	height: 21px;
-	display: block;
-	border: none;
-	background-color: transparent;
-	box-shadow: none;
-	border-radius: 50%;
+#header .notifications .notifications-state {
+	margin: 0;
+	padding: 28px 18px;
 	text-align: center;
-	padding: 10px;
-	opacity: 0.7;
-	cursor: pointer;
-}
-.notifications-button.hasNotifications {
-	opacity: 1 !important;
+	color: var(--oco-text-secondary, #5b6675);
+	font: 500 13px/1.45 var(--oco-font-text, system-ui, sans-serif);
 }
 
-.notifications-button:hover {
-	opacity: 1;
+#header .notifications .notifications-error p {
+	margin: 0 0 12px;
 }
 
-.notification .button {
-	border: 1px solid rgba(240,240,240,.9) !important;
-	padding: 0 10px;
-	box-shadow: none;
+#header .notifications .notifications-state.hidden,
+#header .notifications .notification-wrapper.hidden {
+	display: none;
+}
+
+#header .notifications .notification-wrapper {
 	margin: 0;
-	float: left;
-}
-
-.notification .notification-actions {
-	float:right;
 	padding: 0;
+	list-style: none;
 }
 
-.notification .notification-actions:first-child {
-	margin-left: auto;
+#header .notifications .notification {
+	display: grid;
+	grid-template-columns: 32px minmax(0, 1fr) 32px;
+	column-gap: 12px;
+	align-items: start;
+	margin: 0;
+	padding: 14px 10px 14px 16px;
+	border-bottom: 1px solid var(--oco-border-row, #f4f6f9);
+	color: var(--oco-ink, #062B27);
+	list-style: none;
 }
 
-.notification .notification-subject {
-	display: inline-block;
-	margin-right: 10px;
-	font-weight: bold;
+#header .notifications .notification:last-child {
+	border-bottom: 0;
 }
 
-.notification .notification-icon {
+#header .notifications .notification-pending {
+	opacity: .55;
+}
+
+#header .notifications .notification-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
 	width: 32px;
 	height: 32px;
-	margin-right: 14px;
+	margin: 0;
+	object-fit: contain;
 }
 
-.notification .notification-content {
-	overflow: hidden;
+#header .notifications .notification-icon-default {
+	border-radius: 50%;
+	background-color: var(--oco-neutral-bg, #EEF2F8);
+	color: var(--oco-text-secondary, #5b6675);
 }
 
-.notification .notification-title {
-	color: #000;
-	font-size: 12.8px;
-	line-height: 20.48px;
-	font-weight: 600;
-	margin: 5px 0 10px;
-	width: 270px;
-	/*white-space: nowrap;*/
-	overflow: hidden;
-	text-overflow: ellipsis;
+#header .notifications .notification-content {
+	min-width: 0;
+	overflow-wrap: anywhere;
 }
 
-.notification .notification-message {
-	line-height: 20px;
-	padding-bottom: 5px;
-	width: 270px;
-	/*white-space: nowrap;*/
-	overflow: hidden;
-	text-overflow: ellipsis;
+#header .notifications .notification-title {
+	margin: 0;
+	padding: 0;
+	color: var(--oco-ink, #062B27);
+	font: 600 14px/1.4 var(--oco-font-text, system-ui, sans-serif);
 }
 
-.notification-container {
-	box-shadow: 0 1px 10px rgba(50, 50, 50, .7);
-	overflow: auto;
-	overflow-x: hidden;
+#header .notifications .notification-link {
+	color: inherit;
+	/* header.css setzt "#header a" eine eigene Schrift. */
+	font: inherit;
+	text-decoration: none;
 }
 
-.notifications .emptycontent {
-	margin: 50px 0;
+#header .notifications .notification-link:hover {
+	text-decoration: underline;
+}
+
+#header .notifications .notification-message {
+	margin: 4px 0 0;
+	color: var(--oco-text-secondary, #5b6675);
+	font: 400 13px/1.45 var(--oco-font-text, system-ui, sans-serif);
+}
+
+#header .notifications .notification-time {
+	display: block;
+	margin-top: 4px;
+	color: var(--oco-text-secondary, #5b6675);
+	font: 400 12px/1.4 var(--oco-font-text, system-ui, sans-serif);
+}
+
+#header .notifications .notification-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-top: 10px;
+}
+
+#header .notifications .notification-action-button {
+	min-height: 32px;
+	margin: 0;
+	padding: 0 12px;
+	border: 1px solid var(--oco-border-control, #78899F);
+	border-radius: var(--oco-radius-button, 10px);
+	background-color: var(--oco-surface, #ffffff);
+	color: var(--oco-navy, #041e42);
+	font: 600 13px/1 var(--oco-font-ui, system-ui, sans-serif);
+	cursor: pointer;
+}
+
+#header .notifications .notification-action-button.primary {
+	border-color: var(--oco-teal-ink, #00806b);
+	background-color: var(--oco-teal-ink, #00806b);
+	color: #ffffff;
+}
+
+/* Eigene Hover-Zustände: auf den Einstellungsseiten färbt sonst
+   "#body-settings.oco-shell button.primary:hover" die Fläche hell ein, und
+   die weiße Schrift läge bei 2,1:1. */
+#header .notifications .notification-action-button:hover,
+#header .notifications .notifications-retry:hover {
+	border-color: var(--oco-navy, #041e42);
+	background-color: var(--oco-neutral-bg, #EEF2F8);
+	color: var(--oco-navy, #041e42);
+}
+
+#header .notifications .notification-action-button.primary:hover {
+	border-color: var(--oco-navy, #041e42);
+	background-color: var(--oco-navy, #041e42);
+	color: #ffffff;
+}
+
+/* Immer sichtbar: vorher erschien das Kreuz nur beim Überfahren mit der Maus,
+   auf Touch-Geräten und für die Tastatur war es unsichtbar. */
+#header .notifications .notification-delete {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	min-height: 32px;
+	margin: -6px 0 0;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: transparent;
+	color: var(--oco-text-secondary, #5b6675);
+	cursor: pointer;
+	opacity: 1;
+}
+
+#header .notifications .notification-delete:hover {
+	background-color: var(--oco-neutral-bg, #EEF2F8);
+	color: var(--oco-navy, #041e42);
+}
+
+#header .notifications .notifications-retry {
+	min-height: 32px;
+	margin: 0;
+	padding: 0 14px;
+	border: 1px solid var(--oco-border-control, #78899F);
+	border-radius: var(--oco-radius-button, 10px);
+	background-color: var(--oco-surface, #ffffff);
+	color: var(--oco-navy, #041e42);
+	font: 600 13px/1 var(--oco-font-ui, system-ui, sans-serif);
+	cursor: pointer;
+}
+
+/* --- Schmale Fenster ---------------------------------------------------- */
+
+@media (max-width: 767px) {
+	#header .notifications .notifications-button {
+		width: 44px;
+		height: 44px;
+		min-width: 44px;
+		min-height: 44px;
+	}
+
+	/* Das Menü hängt an der Glocke rechts oben; auf dem Telefon nimmt es die
+	   Breite des Fensters mit 16 px Rand. Unten endet es über der Reiterleiste
+	   des Kerns (z-index 2800): darunter verschwanden die letzten Meldungen
+	   und ließen sich nicht mehr hervorrollen. */
+	#header .notifications .notification-container {
+		position: fixed;
+		top: calc(var(--oco-topbar-height, 64px) + 4px);
+		left: 16px;
+		right: 16px;
+		width: auto;
+		max-width: none;
+		max-height: calc(100vh - var(--oco-topbar-height, 64px) - var(--oco-tabbar-height, 84px) - 16px);
+		/* dvh: die sichtbare Höhe bei eingeblendeter Adressleiste. 100vh ist
+		   dort die große Höhe, und die Liste reichte wieder unter die Leiste. */
+		max-height: calc(100dvh - var(--oco-topbar-height, 64px) - var(--oco-tabbar-height, 84px) - 16px);
+	}
+
+	/* Der Kern setzt auf schmalen Fenstern jeden Knopf in #header auf 44 px
+	   (owncloud-online-shell.css). Die Spalte des Kreuzes wächst mit, sonst
+	   ragte es hinaus und der Fokusrahmen wurde rechts abgeschnitten. */
+	#header .notifications .notification {
+		grid-template-columns: 32px minmax(0, 1fr) 44px;
+		padding-right: 8px;
+	}
+
+	#header .notifications .notification-delete {
+		width: 44px;
+		height: 44px;
+		min-height: 44px;
+		margin-top: -10px;
+	}
 }

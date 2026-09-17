@@ -506,4 +506,13 @@ class EndpointControllerTest extends TestCase {
 			$this->invokePrivate($this->getController(), 'actionToArray', [$action])
 		);
 	}
+
+	/**
+	 * Ohne Link kein Verweis auf die Startseite.
+	 */
+	public function testGetAbsoluteLinkKeepsEmptyLink() {
+		$this->urlGenerator->expects($this->never())
+			->method('getAbsoluteUrl');
+		$this->assertSame('', $this->invokePrivate($this->getController(), 'getAbsoluteLink', ['']));
+	}
 }
