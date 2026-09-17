@@ -29,6 +29,11 @@ Kern mit App 0.7.x zeigt sie ohne Leertext und an falscher Stelle.
 - Browser-Benachrichtigungen nur für unsichtbare Tabs, mehrere neue Meldungen
   als eine Sammelmeldung. Ein unsichtbarer Tab fragt nur mit erteilter
   Erlaubnis ab, dann alle zwei Minuten.
+- Neue Karte „Browser-Benachrichtigungen“ in den persönlichen Einstellungen:
+  zeigt, ob der Browser Benachrichtigungen erlaubt, blockiert oder noch nicht
+  gefragt hat, und fragt per Knopf nach. Die Glocke fragt nicht mehr von sich
+  aus (Browser lehnen Anfragen ohne Nutzeraktion ab); ohne die Karte ließen
+  sich Browser-Benachrichtigungen nicht mehr erlauben.
 - Die offene Liste liegt über dem Upload-Panel.
 - Einstellungskarte: Hinweis auf die E-Mail-Adresse nur, wenn keine
   eingetragen ist; er verweist auf das Profil.

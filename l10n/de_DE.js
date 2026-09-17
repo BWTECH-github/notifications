@@ -29,6 +29,13 @@ OC.L10N.register(
     "To be able to receive mail notifications it is required to specify an email address for your account." : "Damit Sie E-Mail-Benachrichtigungen erhalten können, tragen Sie in Ihrem Profil eine E-Mail-Adresse ein.",
     "Open in %s" : "In %s öffnen",
     "Open in %s:" : "In %s öffnen:",
-    "If the button does not work, open this address:" : "Falls die Schaltfläche nicht funktioniert, öffnen Sie diese Adresse:"
+    "If the button does not work, open this address:" : "Falls die Schaltfläche nicht funktioniert, öffnen Sie diese Adresse:",
+    "Browser notifications" : "Browser-Benachrichtigungen",
+    "Show a notification from your browser when something new arrives while this page is open in a background tab." : "Zeigt eine Benachrichtigung Ihres Browsers, wenn etwas Neues eintrifft, während diese Seite in einem Tab im Hintergrund geöffnet ist.",
+    "Allow browser notifications" : "Browser-Benachrichtigungen erlauben",
+    "Allowed in this browser." : "In diesem Browser erlaubt.",
+    "Blocked in this browser. To change this, allow notifications for this site in the browser settings." : "In diesem Browser blockiert. Zum Ändern die Benachrichtigungen für diese Seite in den Browser-Einstellungen erlauben.",
+    "Not allowed yet." : "Noch nicht erlaubt.",
+    "This browser does not support notifications." : "Dieser Browser unterstützt keine Benachrichtigungen."
 },
 "nplurals=2; plural=(n != 1);");

@@ -13,6 +13,11 @@
  *     regions that already exist)
  *   - the email hint only appears while no address is set, and points to the
  *     profile instead of a "General" section the redesign does not have
+ *
+ * Modified by BW-Tech GmbH on 2026-09-17: card "Browser notifications". Since
+ * 1.0.0 the bell no longer asks for permission on its own (browsers refuse or
+ * hide a request without a user action); without this card there was no way
+ * left to allow browser notifications.
  */
 script('notifications', 'personal_settings');
 ?>
@@ -37,4 +42,14 @@ script('notifications', 'personal_settings');
 	<?php else: ?>
 	<p><?php p($l->t('It was not possible to get your session. Please, try reloading the page or logout and login again')); ?></p>
 	<?php endif; ?>
+</div>
+
+<div id="browser_notifications" class="section">
+	<h2 id="browser_notifications_label" class="app-name"><?php p($l->t('Browser notifications')); ?></h2>
+	<p id="browser_notifications_description"><?php p($l->t('Show a notification from your browser when something new arrives while this page is open in a background tab.')); ?></p>
+	<?php /* Status und Knopf setzt personal_settings.js: nur der Browser kennt
+	         die Erlaubnis. Der Knopf fragt erst auf Klick - ohne Nutzeraktion
+	         lehnen Browser die Anfrage ab oder zeigen sie versteckt an. */ ?>
+	<p id="browser_notifications_status" role="status" aria-live="polite" tabindex="-1"></p>
+	<button type="button" id="browser_notifications_allow" aria-describedby="browser_notifications_description" disabled><?php p($l->t('Allow browser notifications')); ?></button>
 </div>

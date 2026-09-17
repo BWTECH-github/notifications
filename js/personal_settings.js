@@ -98,3 +98,74 @@ $(document).ready(function(){
 		$('#email_sending_option').prop('disabled', false);
 	});
 });
+
+/*
+ * Karte "Browser-Benachrichtigungen". Die Glocke fragt seit 1.0.0 nicht mehr
+ * von sich aus nach der Erlaubnis; hier fragt ein Knopf - Browser verlangen
+ * dafür eine Nutzeraktion.
+ */
+$(document).ready(function(){
+	var $status = $('#browser_notifications_status');
+	var $knopf = $('#browser_notifications_allow');
+	if (!$status.length) {
+		return;
+	}
+
+	/**
+	 * @param {string} erlaubnis granted | denied | default
+	 * @param {boolean} [nachKlick] Fokus nach der Entscheidung auf die Statuszeile
+	 */
+	var zeige = function(erlaubnis, nachKlick) {
+		var texte = {
+			granted: t('notifications', 'Allowed in this browser.'),
+			denied: t('notifications', 'Blocked in this browser. To change this, allow notifications for this site in the browser settings.'),
+			'default': t('notifications', 'Not allowed yet.')
+		};
+		$status.text(texte[erlaubnis] || texte['default']);
+		if (erlaubnis === 'default') {
+			$knopf.prop('disabled', false);
+		} else if ($knopf.length) {
+			// Nach der Entscheidung gibt es nichts mehr zu fragen; der Fokus
+			// geht auf die Statuszeile statt mit dem Knopf auf <body>.
+			$knopf.remove();
+			$knopf = $();
+			if (nachKlick) {
+				$status.trigger('focus');
+			}
+		}
+	};
+
+	if (!('Notification' in window) || typeof window.Notification.requestPermission !== 'function') {
+		$status.text(t('notifications', 'This browser does not support notifications.'));
+		$knopf.remove();
+		return;
+	}
+
+	zeige(window.Notification.permission);
+
+	// Merker statt disabled: ein gesperrter Knopf verlöre sofort den Fokus.
+	var fragt = false;
+	$knopf.on('click', function() {
+		if (fragt) {
+			return;
+		}
+		fragt = true;
+		var erledigt = false;
+		var fertig = function(erlaubnis) {
+			// Rückruf und Promise können beide eintreffen
+			if (erledigt) {
+				return;
+			}
+			erledigt = true;
+			fragt = false;
+			zeige(erlaubnis || window.Notification.permission, true);
+		};
+		// Ältere Browser kennen nur die Rückruf-Form, neuere liefern ein Promise.
+		var ergebnis = window.Notification.requestPermission(fertig);
+		if (ergebnis && typeof ergebnis.then === 'function') {
+			ergebnis.then(fertig, function() {
+				fertig(window.Notification.permission);
+			});
+		}
+	});
+});
