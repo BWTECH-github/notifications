@@ -25,12 +25,16 @@ namespace OCA\Notifications\Tests\Unit\Command;
 use OCA\Notifications\Command\Generate;
 use OCA\Notifications\Command\RepairNotifications;
 use OCA\Notifications\Handler;
+use OCA\Notifications\LegacyLinkRewriter;
 use OCA\Notifications\Tests\Unit\TestCase;
+use OCP\IConfig;
 use Symfony\Component\Console\Tester\CommandTester;
 
 class RepairNotificationsTest extends TestCase {
 	/** @var Handler | \PHPUnit\Framework\MockObject\MockObject */
 	protected $handler;
+	/** @var IConfig | \PHPUnit\Framework\MockObject\MockObject */
+	protected $config;
 	/** @var Generate */
 	protected $command;
 	/** @var CommandTester */
@@ -40,8 +44,54 @@ class RepairNotificationsTest extends TestCase {
 		parent::setUp();
 
 		$this->handler = $this->createMock(Handler::class);
-		$this->command = new RepairNotifications($this->handler);
+		$this->config = $this->createMock(IConfig::class);
+		$this->command = new RepairNotifications($this->handler, $this->config);
 		$this->tester = new CommandTester($this->command);
+	}
+
+	public function testOldBaseUrlNeedsOption() {
+		$this->handler->expects($this->never())->method('rewriteLegacyLinks');
+		$response = $this->tester->execute(['subject' => 'oldBaseUrl']);
+		$this->assertEquals(1, $response);
+	}
+
+	public function testOldBaseUrlRejectsInvalidUrl() {
+		$this->handler->expects($this->never())->method('rewriteLegacyLinks');
+		$response = $this->tester->execute(['subject' => 'oldBaseUrl', '--old-base-url' => 'owncloud']);
+		$this->assertEquals(1, $response);
+	}
+
+	public function testOldBaseUrlUsesWebrootOfCliUrl() {
+		$this->config->method('getSystemValue')
+			->with('overwrite.cli.url', '')
+			->willReturn('https://kunde.example.com/cloud');
+		$this->handler->expects($this->once())
+			->method('rewriteLegacyLinks')
+			->willReturnCallback(function (LegacyLinkRewriter $rewriter) {
+				$this->assertSame('/cloud/index.php/f/1', $rewriter->rewrite('/owncloud/index.php/f/1'));
+				return 3;
+			});
+
+		$response = $this->tester->execute(['subject' => 'oldBaseUrl', '--old-base-url' => 'https://alt.example.com/owncloud']);
+		$this->assertEquals(0, $response);
+		$this->assertStringContainsString('3 notifications were updated', $this->tester->getDisplay());
+	}
+
+	public function testOldBaseUrlWithExplicitWebroot() {
+		$this->config->expects($this->never())->method('getSystemValue');
+		$this->handler->expects($this->once())
+			->method('rewriteLegacyLinks')
+			->willReturnCallback(function (LegacyLinkRewriter $rewriter) {
+				$this->assertSame('/index.php/f/1', $rewriter->rewrite('/owncloud/index.php/f/1'));
+				return 0;
+			});
+
+		$response = $this->tester->execute([
+			'subject' => 'oldBaseUrl',
+			'--old-base-url' => '/owncloud',
+			'--new-webroot' => '',
+		]);
+		$this->assertEquals(0, $response);
 	}
 
 	public function testInvalidSubject() {
