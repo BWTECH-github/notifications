@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [1.0.2] - 2026-10-08
+
+Stand der main-Linie (0.7.4 vom 26.09.2026) übernommen.
+
+### Hinzugefügt
+
+- `occ notifications:repairNotifications oldBaseUrl --old-base-url <URL>`
+  schreibt nach dem Umzug einer Datenbank Verweis, Symbol und Aktions-Links
+  der übernommenen Benachrichtigungen auf diese Instanz um. Die Altinstanz (10.x)
+  hat sie mit ihrem Webroot gespeichert (`/owncloud/index.php/f/12`,
+  `/owncloud/core/img/actions/shared.svg`, Annehmen/Ablehnen ausstehender
+  Freigaben) und teils mit ihrem Host. Lag die Altinstanz unter einem
+  Unterpfad oder auf einem anderen Host, führten diese Werte nach dem Umzug
+  ins Leere, auch die Annehmen/Ablehnen-Knöpfe. Umgeschrieben wird
+  nur, was unter dem alten Webroot oder auf dem alten Host liegt; Verweise
+  dieser Instanz und fremder Hosts bleiben unberührt, ein zweiter Lauf ist
+  ein No-op, Anfrage und Anker bleiben erhalten. Belegt in
+  `tests/unit/LegacyLinkRewriterTest.php` und
+  `HandlerTest::testRewriteLegacyLinks`.
+
 ## [1.0.1] - 2026-10-08
 
 ### Behoben

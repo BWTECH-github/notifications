@@ -367,4 +367,92 @@ class Handler {
 
 		return $counter;
 	}
+
+	/**
+	 * Schreibt Link, Icon und Aktions-Links, die eine umgezogene Altinstanz
+	 * gespeichert hat, auf diese Instanz um. Welche Werte zur Altinstanz
+	 * gehören, entscheidet der LegacyLinkRewriter; alle anderen Zeilen und
+	 * Spalten bleiben unverändert.
+	 *
+	 * Die Tabelle wird in Stapeln über den Primärschlüssel gelesen, damit
+	 * auch ein großer Bestand nicht auf einmal im Speicher liegt.
+	 *
+	 * @param LegacyLinkRewriter $rewriter
+	 * @param int $batchSize Zeilen je Abfrage
+	 * @return int number of updated notifications
+	 */
+	public function rewriteLegacyLinks(LegacyLinkRewriter $rewriter, int $batchSize = 1000): int {
+		$batchSize = \max(1, $batchSize);
+		$counter = 0;
+		$lastId = 0;
+
+		do {
+			$sql = $this->connection->getQueryBuilder();
+			$sql->select(['notification_id', 'link', 'icon', 'actions'])
+				->from('notifications')
+				->where($sql->expr()->gt('notification_id', $sql->createNamedParameter($lastId, IQueryBuilder::PARAM_INT)))
+				->orderBy('notification_id', 'ASC')
+				->setMaxResults($batchSize);
+			$statement = $sql->execute();
+			$rows = $statement->fetchAllAssociative();
+			$statement->free();
+
+			foreach ($rows as $row) {
+				$lastId = (int)$row['notification_id'];
+				$changes = $this->legacyLinkChanges($rewriter, $row);
+				if ($changes === []) {
+					continue;
+				}
+				$update = $this->connection->getQueryBuilder();
+				$update->update('notifications')
+					->where($update->expr()->eq(
+						'notification_id',
+						$update->createNamedParameter($lastId, IQueryBuilder::PARAM_INT)
+					));
+				foreach ($changes as $column => $value) {
+					$update->set($column, $update->createNamedParameter($value));
+				}
+				$update->execute();
+				$counter++;
+			}
+		} while (\count($rows) === $batchSize);
+
+		return $counter;
+	}
+
+	/**
+	 * @param LegacyLinkRewriter $rewriter
+	 * @param array $row Zeile mit link, icon und actions
+	 * @return array<string, string> Spalte => neuer Wert, nur für geänderte Spalten
+	 */
+	private function legacyLinkChanges(LegacyLinkRewriter $rewriter, array $row): array {
+		$changes = [];
+		foreach (['link', 'icon'] as $column) {
+			$newValue = $rewriter->rewrite((string)($row[$column] ?? ''));
+			if ($newValue !== null) {
+				$changes[$column] = $newValue;
+			}
+		}
+
+		$actions = \json_decode((string)($row['actions'] ?? ''), true);
+		if (!\is_array($actions)) {
+			return $changes;
+		}
+		$actionsChanged = false;
+		foreach ($actions as $index => $action) {
+			if (!\is_array($action) || !isset($action['link']) || !\is_string($action['link'])) {
+				continue;
+			}
+			$newValue = $rewriter->rewrite($action['link']);
+			if ($newValue !== null) {
+				$actions[$index]['link'] = $newValue;
+				$actionsChanged = true;
+			}
+		}
+		if ($actionsChanged) {
+			// Gleiche Kodierung wie beim Anlegen (sqlInsert)
+			$changes['actions'] = \json_encode($actions);
+		}
+		return $changes;
+	}
 }

@@ -144,14 +144,34 @@ werden, sonst bricht der Befehl ab. Mit `--link` (`-l`) hinterlegen Sie
 eine Adresse, die beim Anklicken der Benachrichtigung geöffnet wird.
 
 `notifications:repairNotifications` korrigiert bereits gespeicherte
-Benachrichtigungen. Zurzeit ist genau ein Thema zulässig:
-`relativeLinks`. Es entfernt die Basisadresse aus absolut gespeicherten
+Benachrichtigungen. Zulässig sind zwei Themen.
+
+`relativeLinks` entfernt die Basisadresse aus absolut gespeicherten
 Verweisen und ist nach einem Wechsel der Adresse der Instanz sinnvoll:
 
     sudo -u www-data php8.4 occ notifications:repairNotifications relativeLinks
 
+`oldBaseUrl` ist für den Umzug einer Datenbank gedacht. Die Altinstanz hat
+Verweis, Symbol und Aktionen (etwa Annehmen/Ablehnen einer Freigabe) mit
+ihrem Webroot gespeichert, teils auch mit ihrem Host. Lag sie unter einem
+Unterpfad wie `/owncloud` oder auf einem anderen Host, zeigen diese Werte nach
+dem Umzug ins Leere. Das Thema schreibt sie auf diese Instanz um:
+
+    sudo -u www-data php8.4 occ notifications:repairNotifications oldBaseUrl \
+      --old-base-url https://cloud.example.com/owncloud
+
+Die alte Basisadresse steht in der Regel in der `config.php` der Altinstanz
+unter `overwrite.cli.url`. Umgeschrieben werden nur relative Verweise unter dem
+alten Webroot und absolute Verweise auf den alten Host; Anfrage und Anker
+bleiben erhalten. Wer nur das Webroot angibt (`--old-base-url /owncloud`),
+erfasst nur die relativen Verweise. Das neue Webroot kommt aus
+`overwrite.cli.url` dieser Instanz, abweichend mit `--new-webroot /pfad`.
+Verweise auf fremde Hosts und Verweise dieser Instanz bleiben unberührt; ein
+zweiter Lauf ändert nichts mehr. Anders als `relativeLinks` behält das Thema
+die Anfrage eines Verweises (etwa `?sectionid=customgroups`).
+
 Der Befehl gibt aus, wie viele Benachrichtigungen geändert wurden. Ein
-anderes Thema als `relativeLinks` wird mit „Invalid subject“ abgewiesen.
+anderes Thema wird mit „Invalid subject“ abgewiesen.
 
 ## Fehlersuche
 
@@ -164,6 +184,7 @@ anderes Thema als `relativeLinks` wird mit „Invalid subject“ abgewiesen.
 | Keine E-Mail, obwohl die Meldung angezeigt wird | Persönliche Einstellung steht auf `never`, oder auf `action` und die Meldung enthält keine Aktion; oder das Benutzerkonto ist gesperrt | Einstellung unter „Einstellungen“ → „Benachrichtigungen“ prüfen; im Protokoll steht bei gesperrten Konten „the account is disabled“ (Stufe Debug) |
 | Keine E-Mail, im Protokoll steht „email for the user isn't set“ oder „isn't valid“ | Im Benutzerkonto fehlt die E-Mail-Adresse oder sie ist ungültig | Gültige Adresse im Benutzerkonto eintragen |
 | Verweise zeigen auf die frühere Adresse der Instanz | Die Verweise wurden absolut gespeichert | `occ notifications:repairNotifications relativeLinks` |
+| Nach einem Datenbank-Umzug führen alte Benachrichtigungen, ihr Symbol oder Annehmen/Ablehnen ins Leere | Gespeichert mit Webroot oder Host der Altinstanz | `occ notifications:repairNotifications oldBaseUrl --old-base-url <alte Basisadresse>` |
 | `notifications:generate` bricht mit „Either user or group needs to be given.“ ab | Weder `--user` noch `--group` angegeben | Einen der beiden Schalter setzen |
 
 Meldungen der App stehen im Protokoll der Instanz unter der App-Kennung

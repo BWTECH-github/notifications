@@ -23,6 +23,8 @@
 namespace OCA\Notifications\Tests\Unit;
 
 use OCA\Notifications\Handler;
+use OCA\Notifications\LegacyLinkRewriter;
+use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Notification\INotification;
 
 /**
@@ -330,5 +332,74 @@ class HandlerTest extends TestCase {
 
 		$notifications = $this->handler->get($limitedNotification);
 		$this->assertCount(1, $notifications);
+	}
+
+	/**
+	 * Altbestand einer Instanz unter https://alt.example.com/altroot: die
+	 * Zeilen stehen so in der Datenbank, wie eine 10.x-Altinstanz sie schrieb.
+	 */
+	public function testRewriteLegacyLinks() {
+		$connection = \OC::$server->getDatabaseConnection();
+		$insert = function (string $user, string $link, string $icon, array $actions) use ($connection) {
+			$qb = $connection->getQueryBuilder();
+			$qb->insert('notifications')->values([
+				'app' => $qb->createNamedParameter('testing_notifications'),
+				'user' => $qb->createNamedParameter($user),
+				'timestamp' => $qb->createNamedParameter(\time(), IQueryBuilder::PARAM_INT),
+				'object_type' => $qb->createNamedParameter('local_share'),
+				'object_id' => $qb->createNamedParameter('ocinternal:7'),
+				'subject' => $qb->createNamedParameter('local_share'),
+				'subject_parameters' => $qb->createNamedParameter('[]'),
+				'message' => $qb->createNamedParameter(''),
+				'message_parameters' => $qb->createNamedParameter('[]'),
+				'link' => $qb->createNamedParameter($link),
+				'icon' => $qb->createNamedParameter($icon),
+				'actions' => $qb->createNamedParameter(\json_encode($actions)),
+			])->execute();
+			return $connection->lastInsertId('*PREFIX*notifications');
+		};
+		$read = function ($id) use ($connection) {
+			$qb = $connection->getQueryBuilder();
+			$row = $qb->select(['link', 'icon', 'actions'])->from('notifications')
+				->where($qb->expr()->eq('notification_id', $qb->createNamedParameter((int)$id, IQueryBuilder::PARAM_INT)))
+				->execute()->fetchAssociative();
+			$row['actions'] = \json_decode($row['actions'], true);
+			return $row;
+		};
+		$pending = '/altroot/ocs/v1.php/apps/files_sharing/api/v1/shares/pending/7';
+		$actions = [
+			['label' => 'decline', 'link' => $pending, 'type' => 'DELETE', 'primary' => false],
+			['label' => 'accept', 'link' => $pending, 'type' => 'POST', 'primary' => true],
+		];
+		$legacyRelative = $insert('test_user1', '/altroot/index.php/f/7', '/altroot/core/img/actions/shared.svg', $actions);
+		$legacyAbsolute = $insert('test_user1', 'https://alt.example.com/altroot/index.php/settings/personal?sectionid=customgroups&group=x', '', []);
+		$foreign = $insert('test_user2', 'https://fremd.example.com/altroot/index.php/f/7', '', []);
+		$current = $insert('test_user2', '/index.php/f/8', '/core/img/actions/shared.svg', [
+			['label' => 'accept', 'link' => '/ocs/v1.php/apps/files_sharing/api/v1/shares/pending/8', 'type' => 'POST', 'primary' => true],
+		]);
+		$currentBefore = $read($current);
+		$foreignBefore = $read($foreign);
+
+		$rewriter = new LegacyLinkRewriter('https://alt.example.com/altroot', '');
+		// Stapelgröße 1: der Lauf muss über alle Stapel hinweg alles finden
+		$this->assertSame(2, $this->handler->rewriteLegacyLinks($rewriter, 1));
+
+		$row = $read($legacyRelative);
+		$this->assertSame('/index.php/f/7', $row['link']);
+		$this->assertSame('/core/img/actions/shared.svg', $row['icon']);
+		$this->assertSame('/ocs/v1.php/apps/files_sharing/api/v1/shares/pending/7', $row['actions'][0]['link']);
+		$this->assertSame('/ocs/v1.php/apps/files_sharing/api/v1/shares/pending/7', $row['actions'][1]['link']);
+		$this->assertSame('DELETE', $row['actions'][0]['type']);
+		$this->assertTrue($row['actions'][1]['primary']);
+		$this->assertSame('/index.php/settings/personal?sectionid=customgroups&group=x', $read($legacyAbsolute)['link']);
+		$this->assertSame($foreignBefore, $read($foreign), 'Fremder Host bleibt unberührt');
+		$this->assertSame($currentBefore, $read($current), 'Neue Daten bleiben unberührt');
+
+		// Zweiter Lauf ändert nichts mehr
+		$this->assertSame(0, $this->handler->rewriteLegacyLinks($rewriter));
+
+		// Die umgeschriebene Zeile liest der Handler wie jede andere
+		$notification = $this->handler->getById((int)$legacyRelative, 'test_user1');
+		$this->assertInstanceOf(INotification::class, $notification);
 	}
 }
