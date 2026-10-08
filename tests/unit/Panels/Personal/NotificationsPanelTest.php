@@ -89,10 +89,13 @@ class NotificationsPanelTest extends \Test\TestCase {
 
 		$page = $this->notificationsPanel->getPanel()->fetchPage();
 		$this->assertStringContainsString('<h2 id="email_notifications_label" class="app-name">Mail Notifications</h2>', $page);
-		if (\in_array($selectedValue, ['never', 'action', 'always'], true)) {
-			$this->assertStringContainsString("<option value=\"$selectedValue\" selected=\"selected\">", $page);
-		} else {
-			$this->assertStringContainsString("<option value=\"$selectedValue\" selected=\"selected\">Choose an option</option>", $page);
+		// Seit 1.0.1 eine Optionsgruppe statt einer Auswahlliste: genau die
+		// gespeicherte Option ist angehakt
+		$this->assertStringContainsString("<fieldset id=\"email_sending_option\"", $page);
+		$this->assertStringContainsString("id=\"email_sending_option_$selectedValue\" value=\"$selectedValue\" checked=\"checked\"", $page);
+		$this->assertSame(1, \substr_count($page, 'checked="checked"'));
+		if (!\in_array($selectedValue, ['never', 'action', 'always'], true)) {
+			$this->assertStringContainsString("<label for=\"email_sending_option_$selectedValue\">Choose an option</label>", $page);
 		}
 	}
 
@@ -103,7 +106,7 @@ class NotificationsPanelTest extends \Test\TestCase {
 
 		$page = $this->notificationsPanel->getPanel()->fetchPage();
 		$this->assertStringContainsString('not possible to get your session', $page);
-		$this->assertStringNotContainsString('<select id="email_sending_option">', $page);
+		$this->assertStringNotContainsString('id="email_sending_option"', $page);
 	}
 
 	public function dataEmailHint() {
