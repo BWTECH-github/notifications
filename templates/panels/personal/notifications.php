@@ -18,6 +18,11 @@
  * 1.0.0 the bell no longer asks for permission on its own (browsers refuse or
  * hide a request without a user action); without this card there was no way
  * left to allow browser notifications.
+ *
+ * Geändert von BW-Tech GmbH am 2026-10-08 (1.0.1): die Mail-Einstellung ist
+ * eine Optionsgruppe statt einer Auswahlliste. Eine Auswahl kann nicht
+ * umbrechen; „Nur benachrichtigen, wenn eine Aktion nötig ist“ wurde bei
+ * 320–390 px unter dem Pfeil abgeschnitten.
  */
 script('notifications', 'personal_settings');
 ?>
@@ -25,13 +30,16 @@ script('notifications', 'personal_settings');
 	<h2 id="email_notifications_label" class="app-name"><?php p($l->t('Mail Notifications'));?></h2>
 	<?php if ($_['validUserObject']): ?>
 	<p id="email_notifications_description"><?php p($l->t('You can choose to be notified about events via mail. Some events are informative, others require an action (like accept/decline). Select your preference below:')); ?></p>
-	<select id="email_sending_option" name="email_sending_option" aria-labelledby="email_notifications_label" aria-describedby="email_notifications_description">
+	<fieldset id="email_sending_option" class="notifications-wahl" aria-labelledby="email_notifications_label" aria-describedby="email_notifications_description">
 		<?php foreach ($_['possibleOptions'] as $possibleValue => $data): ?>
-		<option value="<?php p($possibleValue) ?>" <?php if ($data['selected']) {
-			echo 'selected="selected"';
-		} ?>><?php p($data['visibleText']); ?></option>
+		<p class="notifications-wahl-option">
+			<input type="radio" name="email_sending_option" id="email_sending_option_<?php p($possibleValue) ?>" value="<?php p($possibleValue) ?>" <?php if ($data['selected']) {
+				echo 'checked="checked"';
+			} ?> disabled>
+			<label for="email_sending_option_<?php p($possibleValue) ?>"><?php p($data['visibleText']); ?></label>
+		</p>
 		<?php endforeach; ?>
-	</select>
+	</fieldset>
 	<span class="msg" role="status" aria-live="polite"></span>
 	<?php if (!$_['hasEmail']): ?>
 	<?php /* Der bisherige Schlüssel bleibt: er ist in 37 Katalogen übersetzt, ein
