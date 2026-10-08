@@ -342,3 +342,29 @@
 		margin-top: -10px;
 	}
 }
+
+/* Persönliche Einstellungen › Benachrichtigungen: Mail-Einstellung als
+   Optionsgruppe. Lange Beschriftungen brechen um. */
+#email_notifications .notifications-wahl {
+	margin: 8px 0 0;
+	padding: 0;
+	border: 0;
+	min-width: 0;
+}
+
+#email_notifications .notifications-wahl-option {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 4px 0;
+}
+
+#email_notifications .notifications-wahl-option input[type="radio"] {
+	flex: 0 0 auto;
+	margin: 0;
+}
+
+#email_notifications .notifications-wahl-option label {
+	min-width: 0;
+	overflow-wrap: anywhere;
+}

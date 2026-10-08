@@ -51,8 +51,18 @@
 
 $(document).ready(function(){
 	var model = new OCA.Notifications.Settings.Model();
+	// Optionsgruppe statt Auswahlliste (eine Auswahl kann nicht umbrechen).
 	// Der Server rendert die gespeicherte Auswahl schon in die Seite.
-	var gespeichert = $('#email_sending_option').val();
+	var $optionen = $('#email_sending_option input[name="email_sending_option"]');
+	var wahl = function() {
+		return $optionen.filter(':checked').val();
+	};
+	var waehlen = function(wert) {
+		$optionen.filter(function() {
+			return this.value === wert;
+		}).prop('checked', true);
+	};
+	var gespeichert = wahl();
 	// Mit den Pfeiltasten entstehen mehrere Speichervorgänge kurz
 	// hintereinander. Nur der jüngste entscheidet, was das Feld zeigt; ein
 	// älterer Fehlschlag setzt nicht zurück, was danach gewählt wurde.
@@ -60,13 +70,12 @@ $(document).ready(function(){
 	var bestaetigt = 0;
 	var letzteGescheitert = false;
 
-	$('#email_sending_option').change(function(){
-		var $element = $(this);
+	$optionen.change(function(){
 		var changeMap = {};
-		var neu = $element.val();
+		var neu = wahl();
 		var nr = ++letzteAnfrage;
 		letzteGescheitert = false;
-		changeMap[$element.prop('name')] = neu;
+		changeMap.email_sending_option = neu;
 
 		OC.msg.startSaving('#email_notifications .msg');
 		model.save(changeMap, {patch: true}).done(function(result){
@@ -78,7 +87,7 @@ $(document).ready(function(){
 				OC.msg.finishedSuccess('#email_notifications .msg', result.data.message);
 			} else if (letzteGescheitert) {
 				// Der jüngste Versuch scheiterte, dieser ältere kam durch.
-				$element.val(gespeichert);
+				waehlen(gespeichert);
 			}
 		}).fail(function(result){
 			if (nr !== letzteAnfrage) {
@@ -86,7 +95,7 @@ $(document).ready(function(){
 			}
 			letzteGescheitert = true;
 			// Das Feld zeigte sonst weiter den nicht gespeicherten Wert.
-			$element.val(gespeichert);
+			waehlen(gespeichert);
 			// Ohne JSON (412, HTML-Fehlerseite, Status 0) warf der Zugriff einen
 			// TypeError, und "Speichern…" blieb stehen.
 			var message = result && result.responseJSON && result.responseJSON.data && result.responseJSON.data.message;
@@ -95,7 +104,7 @@ $(document).ready(function(){
 	}).prop('disabled', true);
 
 	model.fetch().always(function(){
-		$('#email_sending_option').prop('disabled', false);
+		$optionen.prop('disabled', false);
 	});
 });
 

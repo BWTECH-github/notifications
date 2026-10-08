@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [1.0.1] - 2026-10-08
+
+### Behoben
+
+- Glocke: der Text einer Meldung steht vollständig da. Er wurde ab 240 Zeichen
+  mit „…“ gekürzt; bei einer Meldung ohne Verweis war der Rest nirgends zu
+  lesen.
+- Persönliche Einstellungen › Benachrichtigungen: die Mail-Einstellung ist
+  eine Optionsgruppe statt einer Auswahlliste. Eine Auswahl kann nicht
+  umbrechen; „Nur benachrichtigen, wenn eine Aktion nötig ist“ wurde bei
+  320–390 px unter dem Pfeil abgeschnitten.
+
 ## [1.0.0] - 2026-09-17
 
 Erste Fassung für die Redesign-Oberfläche von owncloud.online 11.1.

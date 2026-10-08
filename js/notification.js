@@ -108,23 +108,12 @@
 		},
 
 		/**
-		 * Kurzfassung für die Liste: nach dem Wortende ab 200 Zeichen, hart bei
-		 * 240. Den vollen Text öffnet der Verweis der Meldung.
+		 * Text für die Liste: vollständig, Zeilenumbrüche als Leerzeichen. Die
+		 * Liste rollt selbst; eine Kürzung mit „…“ verschwieg den Rest der
+		 * Meldung (bei einer Meldung ohne Verweis gab es ihn nirgends).
 		 */
 		getMessage: function() {
-			var message = this.message;
-
-			if (message.length > 240) {
-				var spacePosition = message.indexOf(' ', 200);
-				if (spacePosition !== -1 && spacePosition <= 240) {
-					message = message.substring(0, spacePosition);
-				} else {
-					message = message.substring(0, 240);
-				}
-				message += '…';
-			}
-
-			return message.replace(/\s*\n\s*/g, ' ');
+			return this.message.replace(/\s*\n\s*/g, ' ');
 		},
 
 		getRawMessage: function() {
