@@ -212,6 +212,9 @@
 
 #header .notifications .notification-message {
 	margin: 4px 0 0;
+	/* Zeilenumbrüche der Nachricht bleiben stehen (mehrzeilige Ankündigungen,
+	   Aufzählungen) - wie in der Benachrichtigungsmail. */
+	white-space: pre-line;
 	color: var(--oco-text-secondary, #5b6675);
 	font: 400 13px/1.45 var(--oco-font-text, system-ui, sans-serif);
 }
