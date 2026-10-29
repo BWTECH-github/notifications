@@ -108,12 +108,20 @@
 		},
 
 		/**
-		 * Text für die Liste: vollständig, Zeilenumbrüche als Leerzeichen. Die
+		 * Text für die Liste: vollständig, mit seinen Zeilenumbrüchen. Die
 		 * Liste rollt selbst; eine Kürzung mit „…“ verschwieg den Rest der
 		 * Meldung (bei einer Meldung ohne Verweis gab es ihn nirgends).
+		 *
+		 * Umbrüche bleiben stehen (die Liste setzt white-space: pre-line):
+		 * als Leerzeichen lief eine Ankündigung mit Aufzählung zu einem
+		 * Absatz zusammen („Geplante Arbeiten: - A - B - C“). Leerzeichen an
+		 * den Zeilenenden fallen weg, mehr als eine Leerzeile wird zu einer.
 		 */
 		getMessage: function() {
-			return this.message.replace(/\s*\n\s*/g, ' ');
+			return this.message
+				.replace(/[ \t]*\r?\n[ \t]*/g, '\n')
+				.replace(/\n{3,}/g, '\n\n')
+				.trim();
 		},
 
 		getRawMessage: function() {
