@@ -83,6 +83,9 @@
 	float: right;
 	width: 21px;
 	height: 21px;
+	/* Seit die Glocke ein <button> ist, rechnet der Browser Innenabstand in die
+	   21 px ein (border-box); die Glocke saß dann rund 10 px zu hoch im Kopf. */
+	box-sizing: content-box;
 	display: block;
 	border: none;
 	background-color: transparent;

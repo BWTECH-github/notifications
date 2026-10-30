@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [0.7.5] - 2026-10-30
+
+### Fixed
+
+- Die Glocke im Kopfbereich sitzt wieder mittig. Seit sie ein `<button>` ist,
+  zählte der Browser den Innenabstand in die 21 px Höhe ein; die Glocke stand
+  dadurch rund 10 px zu hoch und ihre Klickfläche war nur 21 px groß.
+
 ## [0.7.4] - 2026-09-26
 
 ### Added
