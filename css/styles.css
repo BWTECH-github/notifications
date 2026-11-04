@@ -90,11 +90,12 @@
 	position: absolute;
 	top: calc(100% + 8px);
 	right: 0;
-	/* Über dem Upload-Panel des Kerns (.oco-uploads, 2600), das unten rechts
-	   sonst die letzten Meldungen samt Tastaturfokus verdeckte; unter
-	   Reiterleiste (2800), Schleier (2900), Seitenleiste (3000) und
-	   Detail-Vollbild (3200). */
-	z-index: 2700;
+	/* Über den Meldungen des Kerns (#notification-container, 3300): Eine
+	   stehende Meldung deckte sonst den Anfang der Liste ab (gemessen bei
+	   390 px). Das Menü schließt bei jedem Klick daneben und liegt so nie
+	   über offener Schublade oder Detailansicht; auf dem Telefon endet es
+	   über der Reiterleiste (siehe „Schmale Fenster“). */
+	z-index: 3310;
 	width: 380px;
 	max-width: calc(100vw - 32px);
 	/* Rollen statt abschneiden: vorher war bei 260 px Schluss, und was
